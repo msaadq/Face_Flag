@@ -54,7 +54,14 @@ public class MainActivity extends AppCompatActivity {
         cheeks_pos = faceCharacteristics.getCheeks_pos();
         eyes_pos = faceCharacteristics.getEyes_pos();
         croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
-        resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap,100,100,false);
+        resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
+
+        FaceBoundaryDetector faceBoundaryDetector = new FaceBoundaryDetector(croppedBitmap, cheeks_pos[0], cheeks_pos[1]);
+        int[] array = faceBoundaryDetector.getStandardColor();
+
+        for (int number : array) {
+            Log.e("number color", String.valueOf(number));
+        }
 
         // Set bitmap in ImageView
         bitmap_image.setImageBitmap(resizedBitmap);
