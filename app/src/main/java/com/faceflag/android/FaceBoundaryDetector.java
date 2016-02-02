@@ -56,12 +56,27 @@ class FaceBoundaryDetector {
     public FaceBoundaryDetector(Bitmap face, int[] cheekOne, int[] cheekTwo) {
         faceResolution = new int[]{face.getWidth(), face.getHeight()};
 
-        this.face = face;
+        this.face = getNormalizedface(face);
         this.cheekOne = cheekOne;
         this.cheekTwo = cheekTwo;
 
         incrementalFactorX = (double) faceResolution[0] / 100.0;
         incrementalFactorY = (double) faceResolution[1] / 100.0;
+    }
+
+    private Bitmap getNormalizedface(Bitmap randomFace) {
+        int bitmapOrientation = randomFace.getHeight() > randomFace.getWidth()? 1 : randomFace.getHeight() < randomFace.getWidth()? -1 : 0;
+
+        switch (bitmapOrientation) {
+            case 1:
+                randomFace = Bitmap.createBitmap(randomFace, 0, (randomFace.getHeight() - randomFace.getWidth()) / 2, randomFace.getWidth(), randomFace.getWidth());
+                break;
+            case -1:
+                randomFace = Bitmap.createBitmap(randomFace, (randomFace.getWidth() - randomFace.getHeight()) / 2, 0, randomFace.getHeight(), randomFace.getHeight());
+                break;
+        }
+
+        return Bitmap.createScaledBitmap(randomFace, 100, 100, false);
     }
 
     //TODO: Nothing :P Just want your attention ;P I modified this function it now returns a array of colors
@@ -134,7 +149,6 @@ class FaceBoundaryDetector {
         //TODO: Nothing :P Just want your attention ;P THIS PART FINDS OUT THE RIGHT LIMIT OF THE FACE EXCLUDING THE EAR
         transitions = 0;
         for(int count=0;count<colorRangeArray.size();count++) {
-            outerloop:
             for (int j = 0; j < 100; j++) {
                 for (int i = 99; i >= 30; i--) {
                     boolean thisIsFacePart = getIsFacePart(new int[]{i, j}, colorRangeArray.get(count));
