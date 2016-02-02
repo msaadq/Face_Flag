@@ -61,7 +61,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
             Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
             Toast.makeText(this, "We couldn't detect any faces. Please try uploading another " +
                             "image", Toast.LENGTH_LONG).show();
-            //Start Flag Display activity
+            //Start Photo activity
             startActivity(intent);
         }
 
