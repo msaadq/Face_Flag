@@ -19,10 +19,9 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class FlagDisplayActivity extends AppCompatActivity {
 
     int cheeks_pos[][];
     int eyes_pos[][];
@@ -30,16 +29,15 @@ public class MainActivity extends AppCompatActivity {
     ImageView bitmap_image;
     GridView gridView;
     GridViewAdapter gridAdapter;
-    Bitmap croppedBitmap;
-    Bitmap resizedBitmap;
+    public static Bitmap croppedBitmap;
+    public static Bitmap resizedBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        InputStream stream = getResources().openRawResource(R.raw.image02);
-        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+        Bitmap bitmap = PhotoActivity.originalImageBitmap;
 
         FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
@@ -76,10 +74,9 @@ public class MainActivity extends AppCompatActivity {
                 ImageItem item = (ImageItem) parent.getItemAtPosition(position);
 
                 //Create intent
-                Intent intent = new Intent(MainActivity.this, FinalImageActivity.class);
+                Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
                 Log.v("Image: ",String.valueOf(item.getTitle()));
                 intent.putExtra("title", item.getTitle());
-
 
                 //Start details activity
                 startActivity(intent);

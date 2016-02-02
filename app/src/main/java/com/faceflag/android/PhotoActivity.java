@@ -7,29 +7,24 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class PhotoActivity extends AppCompatActivity {
 
     public static final int GET_FROM_GALLERY = 3;
+    public static Bitmap originalImageBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.photo_activity);
+        setContentView(R.layout.flag_activity);
 
         Button galleryButton = (Button) findViewById(R.id.button_gallery);
-        Button cameraButton = (Button) findViewById(R.id.button_camera);
 
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,10 +45,17 @@ public class PhotoActivity extends AppCompatActivity {
         //Detects request codes
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             Uri selectedImage = data.getData();
-            Bitmap bitmap = null;
+            originalImageBitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-                Log.v("PhotoActivity","Captured image");
+                originalImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
+                        selectedImage);
+                Log.v("PhotoActivity", "Captured image");
+
+                //Create intent
+                Intent intent = new Intent(PhotoActivity.this, FlagDisplayActivity.class);
+
+                //Start Flag Display activity
+                startActivity(intent);
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
