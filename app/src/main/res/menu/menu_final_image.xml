@@ -11,16 +11,19 @@
         android:id="@+id/menu_item_delete"
         android:icon="@android:drawable/ic_menu_delete"
         android:title="Share"
-        app:showAsAction="always"
-        android:actionProviderClass=
-            "android.widget.ShareActionProvider" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_item_save"
         android:icon="@android:drawable/ic_menu_save"
         android:title="Share"
-        app:showAsAction="always"
-        android:actionProviderClass=
-            "android.widget.ShareActionProvider" />
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_item_logo"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Share"
+        app:showAsAction="always" />
+
 
 </menu>
