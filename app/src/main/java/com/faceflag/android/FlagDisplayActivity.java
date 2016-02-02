@@ -38,6 +38,10 @@ public class FlagDisplayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flag_activity);
 
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_media_route_on_mono_dark);
+
         Bitmap bitmap = PhotoActivity.originalImageBitmap;
 
         FaceDetector detector = new FaceDetector.Builder(getApplicationContext())

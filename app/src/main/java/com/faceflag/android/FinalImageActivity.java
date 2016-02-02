@@ -35,6 +35,10 @@ public class FinalImageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.final_image_activity);
 
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_media_route_on_mono_dark);
+
         imageView = (ImageView) findViewById(R.id.image);
         imageView.setImageResource(R.drawable.bg_image);
 
