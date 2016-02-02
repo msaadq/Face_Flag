@@ -28,6 +28,7 @@ public class FaceCharacteristics {
 
     public int[][] getCheeks_pos(){
         //for (int i = 0; i < mFaces.size(); ++i) {
+
         for (int i = 0; i < 1; ++i) {
             Face face = faces.valueAt(i);
 

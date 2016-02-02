@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -35,7 +36,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.flag_activity);
 
         Bitmap bitmap = PhotoActivity.originalImageBitmap;
 
@@ -51,38 +52,52 @@ public class FlagDisplayActivity extends AppCompatActivity {
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
         SparseArray<Face> faces = detector.detect(frame);
 
-        faceCharacteristics = new FaceCharacteristics(faces);
+        Log.v("Faces Detected: ",String.valueOf(faces.size()));
 
-        // Get face features
-        cheeks_pos = faceCharacteristics.getCheeks_pos();
-        eyes_pos = faceCharacteristics.getEyes_pos();
-        croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
-        resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap,100,100,false);
+        if (faces.size() == 0){
+            Log.v("Inside ", "Zero Condition");
 
-        // Set bitmap in ImageView
-        //bitmap_image.setImageBitmap(resizedBitmap);
+            //Create intent
+            Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
+            Toast.makeText(this, "We couldn't detect any faces. Please try uploading another " +
+                            "image", Toast.LENGTH_LONG).show();
+            //Start Flag Display activity
+            startActivity(intent);
+        }
 
-        // Release resources associated with DetectorFace object
-        detector.release();
+        else {
+            faceCharacteristics = new FaceCharacteristics(faces);
 
-        gridView = (GridView) findViewById(R.id.gridView);
-        gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
-        gridView.setAdapter(gridAdapter);
+            // Get face features
+            cheeks_pos = faceCharacteristics.getCheeks_pos();
+            eyes_pos = faceCharacteristics.getEyes_pos();
+            croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
+            resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                ImageItem item = (ImageItem) parent.getItemAtPosition(position);
+            // Set bitmap in ImageView
+            //bitmap_image.setImageBitmap(resizedBitmap);
 
-                //Create intent
-                Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
-                Log.v("Image: ",String.valueOf(item.getTitle()));
-                intent.putExtra("title", item.getTitle());
+            // Release resources associated with DetectorFace object
+            detector.release();
 
-                //Start details activity
-                startActivity(intent);
-            }
-        });
+            gridView = (GridView) findViewById(R.id.gridView);
+            gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
+            gridView.setAdapter(gridAdapter);
 
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    ImageItem item = (ImageItem) parent.getItemAtPosition(position);
+
+                    //Create intent
+                    Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
+                    Log.v("Image: ", String.valueOf(item.getTitle()));
+                    intent.putExtra("title", item.getTitle());
+
+                    //Start details activity
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     /**
@@ -124,4 +139,6 @@ public class FlagDisplayActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
+

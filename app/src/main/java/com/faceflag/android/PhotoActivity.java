@@ -22,7 +22,7 @@ public class PhotoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.flag_activity);
+        setContentView(R.layout.photo_gallery_activity);
 
         Button galleryButton = (Button) findViewById(R.id.button_gallery);
 
