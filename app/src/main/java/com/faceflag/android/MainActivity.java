@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,7 +18,6 @@ import android.widget.ImageView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.face.Landmark;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -79,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 ImageItem item = (ImageItem) parent.getItemAtPosition(position);
 
                 //Create intent
-                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                Intent intent = new Intent(MainActivity.this, FinalImageActivity.class);
                 Log.v("Image: ",String.valueOf(item.getTitle()));
                 intent.putExtra("title", item.getTitle());
 

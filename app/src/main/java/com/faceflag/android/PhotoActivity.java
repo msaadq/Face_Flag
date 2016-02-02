@@ -55,19 +55,9 @@ public class PhotoActivity extends AppCompatActivity {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
                 Log.v("PhotoActivity","Captured image");
 
-                //Create intent
-                Intent intent = new Intent(PhotoActivity.this, PhotoDisplayActivity.class);
-                intent.putExtra("image",bitmap);
-
-                //Start details activity
-                startActivity(intent);
-
-
             } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

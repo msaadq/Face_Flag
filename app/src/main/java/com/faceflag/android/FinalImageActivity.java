@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import java.io.InputStream;
 
-public class DetailsActivity extends AppCompatActivity {
+public class FinalImageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +22,6 @@ public class DetailsActivity extends AppCompatActivity {
         titleTextView.setText(title);
 
         ImageView imageView = (ImageView) findViewById(R.id.image);
-
+        imageView.setImageResource(R.drawable.bg_image);
     }
 }
