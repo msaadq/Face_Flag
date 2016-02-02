@@ -3,7 +3,9 @@ package com.faceflag.android;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,28 +23,57 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
+    final String LOG_TAG="MainActivity";
     int cheeks_pos[][];
     int eyes_pos[][];
     FaceCharacteristics faceCharacteristics;
     ImageView bitmap_image;
+    ImageView flag_image;
+    ImageView face_plus_flag_image;
     Bitmap croppedBitmap;
-    Bitmap resizedBitmap;
+    Bitmap resizedFaceBitmap;
+    Bitmap resizedFlagBitmap;
+    Bitmap transparent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        resizedFaceBitmap=getScaledFaceBitmap();
+        resizedFlagBitmap=getScaledFlagBitmap();
+        // Set bitmap in ImageView
+      //  bitmap_image.setImageBitmap(croppedBitmap);
+        flag_image.setImageBitmap(resizedFlagBitmap);
+
+        normalizeCheekPosition();
+
+        DownloadFilesTask downloadFilesTask=new DownloadFilesTask();
+        downloadFilesTask.execute(resizedFaceBitmap);
+        // Release resources associated with DetectorFace object
+
+    }
+
+    void bindViews(){
+        bitmap_image = (ImageView) findViewById(R.id.bitmap_image);
+        flag_image=(ImageView) findViewById(R.id.flag_image);
+        face_plus_flag_image=(ImageView) findViewById(R.id.face_plus_flag_image);
+    }
+
+    Bitmap getScaledFaceBitmap(){
         InputStream stream = getResources().openRawResource(R.raw.image02);
         Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
+        InputStream tansparentStream = getResources().openRawResource(R.raw.image03);
+        Bitmap transpBitmap = BitmapFactory.decodeStream(tansparentStream);
+        transparent=Bitmap.createScaledBitmap(transpBitmap, 100, 100, false);
         FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .build();
 
-        bitmap_image = (ImageView) findViewById(R.id.bitmap_image);
+        bindViews();
 
         // Create a frame from the bitmap and run face detection on the frame.
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
@@ -52,43 +83,60 @@ public class MainActivity extends AppCompatActivity {
 
         // Get face features
         cheeks_pos = faceCharacteristics.getCheeks_pos();
+        Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
+        Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
         eyes_pos = faceCharacteristics.getEyes_pos();
         croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
-        resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
+        Frame frameCropped = new Frame.Builder().setBitmap(croppedBitmap).build();
+        SparseArray<Face> faceCropped = detector.detect(frame);
 
-        FaceBoundaryDetector faceBoundaryDetector = new FaceBoundaryDetector(croppedBitmap, cheeks_pos[0], cheeks_pos[1]);
-        int[] array = faceBoundaryDetector.getStandardColor();
+        faceCharacteristics = new FaceCharacteristics(faceCropped);
 
-        for (int number : array) {
-            Log.e("number color", String.valueOf(number));
-        }
-
-        // Set bitmap in ImageView
-        bitmap_image.setImageBitmap(resizedBitmap);
-
-        // Release resources associated with DetectorFace object
+        cheeks_pos=faceCharacteristics.getCheeks_pos();
+        eyes_pos=faceCharacteristics.getEyes_pos();
+        Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
+        Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
         detector.release();
+        return Bitmap.createScaledBitmap(croppedBitmap,100,100,false);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    Bitmap getScaledFlagBitmap(){
+        InputStream stream = getResources().openRawResource(R.raw.flag);
+        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+        return Bitmap.createScaledBitmap(bitmap,100,100,false);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    void normalizeCheekPosition(){
+        cheeks_pos[0][0]=(cheeks_pos[0][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
+        cheeks_pos[1][0]=(cheeks_pos[1][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
+        cheeks_pos[0][1]=(cheeks_pos[0][1]*resizedFaceBitmap.getHeight())/croppedBitmap.getHeight();
+        cheeks_pos[1][1]=(cheeks_pos[1][1]*resizedFaceBitmap.getHeight())/croppedBitmap.getHeight();
+        eyes_pos[0][0]=(eyes_pos[0][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
+        eyes_pos[1][0]=(eyes_pos[1][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
+        eyes_pos[0][1]=(eyes_pos[0][1]*resizedFaceBitmap.getHeight())/croppedBitmap.getHeight();
+        eyes_pos[1][1]=(eyes_pos[1][1]*resizedFaceBitmap.getHeight())/croppedBitmap.getHeight();
+        Log.v(LOG_TAG,"X: "+eyes_pos[0][0]+"to"+eyes_pos[1][0]);
+        Log.v(LOG_TAG, "Y: " + eyes_pos[0][1] + "to" + eyes_pos[1][1]);
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    private class DownloadFilesTask extends AsyncTask<Bitmap, Integer, Bitmap> {
+        protected Bitmap doInBackground(Bitmap... urls) {
+            for(int i=0;i<100;i++){
+                for(int j=0;j<100;j++){
+                    int color= Color.argb(0,255,255,255);
+                    transparent.setPixel(i,j,color);
+                }
+            }
+            FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
+            Bitmap result=faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
+            return result;
         }
 
-        return super.onOptionsItemSelected(item);
+        protected void onProgressUpdate(Integer... progress) {
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            face_plus_flag_image.setImageBitmap(result);
+        }
     }
 }
