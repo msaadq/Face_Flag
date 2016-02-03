@@ -1,10 +1,14 @@
 package com.faceflag.android;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
@@ -13,37 +17,54 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class FlagDisplayActivity extends AppCompatActivity {
 
+    public static final String LOG_TAG="FACE FLAG FLAGDISPLAY";
     int cheeks_pos[][];
     int eyes_pos[][];
     FaceCharacteristics faceCharacteristics;
     ImageView bitmap_image;
     GridView gridView;
     GridViewAdapter gridAdapter;
-    public static Bitmap croppedBitmap;
-    public static Bitmap resizedBitmap;
-
+    public Bitmap croppedBitmap;
+    public Bitmap resizedBitmap;
+    public ImageButton cancelPickFlag;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flag_activity);
+        setupStatusBar();
+        String imageUriString=getIntent().getStringExtra("URI");
+        Uri selectedImage=Uri.parse(imageUriString);
+        Log.v(LOG_TAG," uri: "+selectedImage);
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.ic_media_route_on_mono_dark);
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
+                    selectedImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        Bitmap bitmap = PhotoActivity.originalImageBitmap;
-
+        cancelPickFlag=(ImageButton) findViewById(R.id.cancel_pick_flag);
+        cancelPickFlag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
@@ -143,6 +164,29 @@ public class FlagDisplayActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    public void setupStatusBar(){
+        LinearLayout linearLayout=(LinearLayout) findViewById(R.id.flag_root_layout);
+        // Set the padding to match the Status Bar height
+        linearLayout.setPadding(0, getStatusBarHeight(this), 0, 0);
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        // enable status bar tint
+        tintManager.setStatusBarTintEnabled(true);
+        // enable navigation bar tint
+        tintManager.setNavigationBarTintEnabled(true);
+        tintManager.setStatusBarAlpha(0.2f);
+        tintManager.setNavigationBarAlpha(0.2f);
+        tintManager.setTintAlpha(0.2f);
+        tintManager.setTintColor(Color.parseColor("#0069FF"));
 
+    }
+    // A method to find height of the status bar
+    public static int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 }
 

@@ -2,8 +2,10 @@ package com.faceflag.android;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,24 +16,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class PhotoActivity extends AppCompatActivity {
 
     public static final int GET_FROM_GALLERY = 3;
-    public static Bitmap originalImageBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_gallery_activity);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.ic_media_route_on_mono_dark);
-
-        Button galleryButton = (Button) findViewById(R.id.button_gallery);
+        setupStatusBar();
+        Button galleryButton = (Button) findViewById(R.id.gallary_button);
 
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,26 +51,40 @@ public class PhotoActivity extends AppCompatActivity {
         //Detects request codes
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             Uri selectedImage = data.getData();
-            originalImageBitmap = null;
-            try {
-                originalImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                        selectedImage);
-                Log.v("PhotoActivity", "Captured image");
 
-                //Create intent
-                Intent intent = new Intent(PhotoActivity.this, FlagDisplayActivity.class);
+            Log.v("PhotoActivity", "Captured image");
 
-                //Start Flag Display activity
-                startActivity(intent);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            //Create intent
+            Intent intent = new Intent(PhotoActivity.this, FlagDisplayActivity.class);
+            intent.putExtra("URI", selectedImage.toString());
+            //Start Flag Display activity
+            startActivity(intent);
+            Log.v("PHOTO ACTIVITY", " uri: " + selectedImage);
         }
     }
 
+    public void setupStatusBar(){
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        // enable status bar tint
+        tintManager.setStatusBarTintEnabled(true);
+        // enable navigation bar tint
+        tintManager.setNavigationBarTintEnabled(true);
+        tintManager.setStatusBarAlpha(0.2f);
+        tintManager.setNavigationBarAlpha(0.2f);
+        tintManager.setTintAlpha(0.2f);
+        tintManager.setTintColor(Color.parseColor("#0069FF"));
+
+    }
+
+    // A method to find height of the status bar
+    public static int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

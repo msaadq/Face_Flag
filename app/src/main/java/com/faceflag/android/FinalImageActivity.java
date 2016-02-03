@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -24,6 +26,9 @@ import java.io.IOException;
 public class FinalImageActivity extends AppCompatActivity {
 
     ImageView imageView;
+    ImageButton deleteButton;
+    ImageButton shareButton;
+    ImageButton saveButton;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -34,48 +39,41 @@ public class FinalImageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.final_image_activity);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.ic_media_route_on_mono_dark);
-
-        imageView = (ImageView) findViewById(R.id.image);
+        bindViews();
         imageView.setImageResource(R.drawable.bg_image);
+        setOnClickListerners();
+
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // Inflate menu resource file.
-        getMenuInflater().inflate(R.menu.menu_final_image, menu);
-        return true;
-
+    void bindViews(){
+        imageView=(ImageView) findViewById(R.id.image);
+        deleteButton=(ImageButton) findViewById(R.id.delete_button);
+        shareButton=(ImageButton) findViewById(R.id.share_button);
+        saveButton=(ImageButton) findViewById(R.id.save_button);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        // Handle item selection
-        switch (item.getItemId()) {
-
-            case R.id.menu_item_share:
-                shareImage();
-                return true;
-
-            case R.id.menu_item_save:
-
-                saveImage();
-                return true;
-
-            case R.id.menu_item_delete:
-
+    void setOnClickListerners(){
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 deleteImage();
-                return true;
+            }
+        });
 
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareImage();
+            }
+        });
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveImage();
+            }
+        });
     }
 
     private void saveImage() {
