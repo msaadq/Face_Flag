@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,18 +13,37 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 public class PhotoActivity extends AppCompatActivity {
 
     public static final int GET_FROM_GALLERY = 3;
 
+    private TextView headerText1;
+    private TextView headerText2;
+    private TextView footerText1;
+    private TextView footerText2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_gallery_activity);
-        setupStatusBar();
+
         Button galleryButton = (Button) findViewById(R.id.gallary_button);
 
+        headerText1=(TextView) findViewById(R.id.header_text_1);
+        headerText2=(TextView) findViewById(R.id.header_text_2);
+        footerText1=(TextView) findViewById(R.id.footer_text_1);
+        footerText2=(TextView) findViewById(R.id.footer_text_2);
+        setupStatusBar();
+        Typeface myTypeface = Typeface.createFromAsset(getAssets(), "fonts/header.ttf");
+        headerText1.setTypeface(myTypeface);
+        headerText2.setTypeface(myTypeface);
+        footerText1.setTypeface(myTypeface);
+        footerText2.setTypeface(myTypeface);
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,6 +76,9 @@ public class PhotoActivity extends AppCompatActivity {
     }
 
     public void setupStatusBar(){
+        RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams) headerText1.getLayoutParams();
+        layoutParams.topMargin+=getStatusBarHeight(getApplicationContext());
+        headerText1.setLayoutParams(layoutParams);
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         // enable status bar tint
         tintManager.setStatusBarTintEnabled(true);

@@ -48,7 +48,7 @@ class FlagOverlay {
 
     ArrayList<int[]> getAvatarCoordinates(ArrayList<int[]> edgeCoordiantes){
         ArrayList<int[]> avatarCoordinates=new ArrayList<int[]>();
-
+        //TODO: Add code to get Avatar Coordinates
         return avatarCoordinates;
     }
 	Bitmap applyFlagFilter(ArrayList<int[]> avatarCoordinates) {
