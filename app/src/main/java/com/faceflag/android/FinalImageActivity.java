@@ -1,6 +1,8 @@
 package com.faceflag.android;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,10 +27,11 @@ import java.io.IOException;
 
 public class FinalImageActivity extends AppCompatActivity {
 
-    ImageView imageView;
-    ImageButton deleteButton;
-    ImageButton shareButton;
-    ImageButton saveButton;
+    private ImageView imageView;
+    private ImageButton deleteButton;
+    private ImageButton shareButton;
+    private ImageButton saveButton;
+
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -37,16 +40,18 @@ public class FinalImageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.final_image_activity);
         bindViews();
+
         imageView.setImageResource(R.drawable.bg_image);
         setOnClickListerners();
-
 
     }
 
     void bindViews(){
+
         imageView=(ImageView) findViewById(R.id.image);
         deleteButton=(ImageButton) findViewById(R.id.delete_button);
         shareButton=(ImageButton) findViewById(R.id.share_button);
@@ -60,14 +65,12 @@ public class FinalImageActivity extends AppCompatActivity {
                 deleteImage();
             }
         });
-
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 shareImage();
             }
         });
-
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,9 +82,16 @@ public class FinalImageActivity extends AppCompatActivity {
     private void saveImage() {
         BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
-
+        /**
         File sdCardDirectory = Environment.getExternalStorageDirectory();
-        File image = new File(sdCardDirectory, "FaceFlag.png");
+        File image = new File(sdCardDirectory, "FaceFlag.jpg");
+        **/
+
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File image=new File(directory,"profile.jpg");
 
         boolean success = false;
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -94,13 +104,14 @@ public class FinalImageActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         } else {
-            Log.v("Coming here", "sjjs");
+
             // Encode the file as a PNG image.
-            FileOutputStream outStream;
+            FileOutputStream outStream = null;
             try {
 
                 outStream = new FileOutputStream(image);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+
                 /* 100 to keep full quality of the image */
 
                 outStream.flush();
@@ -113,7 +124,7 @@ public class FinalImageActivity extends AppCompatActivity {
             }
 
             if (success) {
-                Toast.makeText(getApplicationContext(), "Image saved with success",
+                Toast.makeText(getApplicationContext(), "Image saved!",
                         Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getApplicationContext(),
@@ -124,8 +135,10 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     private void shareImage() {
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
+
         Uri uri = Uri.parse("android.resource://com.faceflag.android/drawable/bg_image");
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting Peshawar Zalmi! Get " +
@@ -135,10 +148,15 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     private void deleteImage(){
+
         //Create intent
         Intent intent = new Intent(FinalImageActivity.this, PhotoActivity.class);
-        Toast.makeText(this, "Image has been deleted. Try out a new one!",
+        Toast.makeText(this, "Image deleted.",
                 Toast.LENGTH_LONG).show();
+
+        //Terminate the already existing activities in stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         //Start Photo activity
         startActivity(intent);
