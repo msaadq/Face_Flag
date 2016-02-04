@@ -31,23 +31,25 @@ import java.util.ArrayList;
 
 public class FlagDisplayActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG="FACE FLAG FLAGDISPLAY";
-    int cheeks_pos[][];
-    int eyes_pos[][];
-    FaceCharacteristics faceCharacteristics;
-    ImageView bitmap_image;
-    GridView gridView;
-    GridViewAdapter gridAdapter;
-    public Bitmap croppedBitmap;
-    public Bitmap resizedBitmap;
-    public ImageButton cancelPickFlag;
+    private static final String LOG_TAG="FACE FLAG FLAGDISPLAY";
+    private int cheeks_pos[][];
+    private int eyes_pos[][];
+    private FaceCharacteristics faceCharacteristics;
+    private GridView gridView;
+    private GridViewAdapter gridAdapter;
+    private Bitmap croppedBitmap;
+    //private Bitmap resizedBitmap;
+    private ImageButton cancelPickFlag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flag_activity);
         setupStatusBar();
+
         String imageUriString=getIntent().getStringExtra("URI");
-        Uri selectedImage=Uri.parse(imageUriString);
+        final Uri selectedImage=Uri.parse(imageUriString);
         Log.v(LOG_TAG," uri: "+selectedImage);
 
         Bitmap bitmap = null;
@@ -65,13 +67,13 @@ public class FlagDisplayActivity extends AppCompatActivity {
                 finish();
             }
         });
+
         FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .build();
 
-        //bitmap_image = (ImageView) findViewById(R.id.bitmap_image);
 
         // Create a frame from the bitmap and run face detection on the frame.
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
@@ -86,6 +88,11 @@ public class FlagDisplayActivity extends AppCompatActivity {
             Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
             Toast.makeText(this, "We couldn't detect any faces. Please try uploading another " +
                             "image", Toast.LENGTH_LONG).show();
+
+            //Terminate the already existing activities in stack
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             //Start Photo activity
             startActivity(intent);
         }
@@ -97,7 +104,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
             cheeks_pos = faceCharacteristics.getCheeks_pos();
             eyes_pos = faceCharacteristics.getEyes_pos();
             croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
-            resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
+            //resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
 
             // Set bitmap in ImageView
             //bitmap_image.setImageBitmap(resizedBitmap);
@@ -117,7 +124,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
                     Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
                     Log.v("Image: ", String.valueOf(item.getTitle()));
                     intent.putExtra("title", item.getTitle());
-
+                    intent.putExtra("URI",selectedImage.toString());
                     //Start details activity
                     startActivity(intent);
                 }
@@ -165,6 +172,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     public void setupStatusBar(){
+
         LinearLayout linearLayout=(LinearLayout) findViewById(R.id.flag_root_layout);
         // Set the padding to match the Status Bar height
         linearLayout.setPadding(0, getStatusBarHeight(this), 0, 0);

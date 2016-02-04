@@ -14,7 +14,10 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:paddingTop="9dp" />
+        android:layout_alignParentBottom="true"
+        android:cropToPadding="true"
+        android:outlineProvider="bounds"
+        android:scaleType="fitXY" />
     <Button
         android:id="@+id/gallary_button"
         android:layout_width="match_parent"

@@ -32,9 +32,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.Random;
 
 public class FinalImageActivity extends AppCompatActivity {
-    public final String LOG_TAG="FACE FLAG FINALIMAGEACTIVITY";
+    public final String LOG_TAG="FACE FLAG";
 
     ImageView imageView;
     ImageButton deleteButton;
@@ -59,15 +62,22 @@ public class FinalImageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.final_image_activity);
+
         bindViews();
-        imageView.setImageResource(R.drawable.bg_image);
         setOnClickListerners();
+        String selectedImage=getIntent().getStringExtra("URI");
         try {
             face= MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                    Uri.parse(getIntent().getStringExtra("URI")));
+                    Uri.parse(selectedImage));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        InputStream stream = getResources().openRawResource(R.raw.face);
+        face = BitmapFactory.decodeStream(stream);
+
+        resizedFaceBitmap=getScaledFaceBitmap();
+        resizedFlagBitmap=getScaledFlagBitmap();
+        normalizeCheekPosition();
         AddFlagOnFace addFlagOnFace=new AddFlagOnFace();
         addFlagOnFace.execute("start");
     }
@@ -150,9 +160,18 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     private void shareImage() {
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/saved_images");
+        myDir.mkdirs();
+        int n = 10000;
+        String fname = "Image-"+ n +".jpg";
+        File file = new File (myDir, fname);
+
+
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        Uri uri = Uri.parse("android.resource://com.faceflag.android/drawable/bg_image");
+        Uri uri = Uri.parse(file.getPath());
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting Peshawar Zalmi! Get " +
                 "your team's flag here: http://playstore.android.com/FaceFlag");
@@ -165,7 +184,9 @@ public class FinalImageActivity extends AppCompatActivity {
         Intent intent = new Intent(FinalImageActivity.this, PhotoActivity.class);
         Toast.makeText(this, "Image has been deleted. Try out a new one!",
                 Toast.LENGTH_LONG).show();
-
+        //Terminate the already existing activities in stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //Start Photo activity
         startActivity(intent);
     }
@@ -173,7 +194,7 @@ public class FinalImageActivity extends AppCompatActivity {
     private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap> {
         protected Bitmap doInBackground(String... uris) {
 
-            FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(face,flag);
+            FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
             return faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
         }
 
@@ -181,12 +202,13 @@ public class FinalImageActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Bitmap result) {
+            SaveImage(result);
             imageView.setImageBitmap(result);
         }
     }
 
     Bitmap getScaledFaceBitmap(){
-        InputStream stream = getResources().openRawResource(R.raw.image02);
+        InputStream stream = getResources().openRawResource(R.raw.face);
         Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
         InputStream tansparentStream = getResources().openRawResource(R.raw.image03);
@@ -226,7 +248,7 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     Bitmap getScaledFlagBitmap(){
-        InputStream stream = getResources().openRawResource(R.raw.flag);
+        InputStream stream = getResources().openRawResource(R.raw.image_1);
         Bitmap bitmap = BitmapFactory.decodeStream(stream);
         return Bitmap.createScaledBitmap(bitmap,100,100,false);
     }
@@ -244,4 +266,55 @@ public class FinalImageActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "Y: " + eyes_pos[0][1] + "to" + eyes_pos[1][1]);
     }
 
+    public static File writebitmaptofilefirst(String filename, String source) {
+        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+        File mFolder = new File(extStorageDirectory + "/temp_images");
+        if (!mFolder.exists()) {
+            mFolder.mkdir();
+        }
+        OutputStream outStream = null;
+
+
+        File file = new File(mFolder.getAbsolutePath(), filename + ".png");
+        if (file.exists()) {
+            file.delete();
+            file = new File(extStorageDirectory, filename + ".png");
+            Log.e("file exist", "" + file + ",Bitmap= " + filename);
+        }
+        try {
+            URL url = new URL(source);
+            Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+
+            outStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.flush();
+            outStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e("file", "" + file);
+        return file;
+
+    }
+
+
+    private void SaveImage(Bitmap finalBitmap) {
+
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/saved_images");
+        myDir.mkdirs();
+        int n = 10000;
+        String fname = "Image-"+ n +".jpg";
+        File file = new File (myDir, fname);
+        if (file.exists ()) file.delete ();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

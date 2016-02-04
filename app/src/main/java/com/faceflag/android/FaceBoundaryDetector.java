@@ -148,7 +148,7 @@ class FaceBoundaryDetector {
                 }
             }
         }
-        leftFaceLimit=leftFaceLimit/transitions;
+        leftFaceLimit=leftFaceLimit/(transitions);
         transitions = 0;
         for(int count=0;count<colorRangeArray.size();count++) {
             outerloop:
@@ -165,7 +165,7 @@ class FaceBoundaryDetector {
             }
         }
 
-        rightFaceLimit=rightFaceLimit/transitions;
+        rightFaceLimit=rightFaceLimit/(transitions);
 
         ArrayList<Integer> faceBottomLimitIndexes=new ArrayList<Integer>();
         for(int count=0;count<colorRangeArray.size();count++) {
