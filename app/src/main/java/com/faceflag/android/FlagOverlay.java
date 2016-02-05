@@ -13,7 +13,7 @@ class FlagOverlay {
 
 	private final int DEFAULT_CHEECK_RANGE=2;
 
-	private int DEFAULT_GRADIENT_DECENT = 2;
+	private int DEFAULT_GRADIENT_DECENT = 8;
 	private int incrementalFactorX=6;
 	private int incrementalFactorY=1;
 
@@ -46,8 +46,26 @@ class FlagOverlay {
 		this.face = getNormalizedImage(face);
 		this.flag = getNormalizedImage(flag);
 
-		this.cheekLeft = cheekLeft;
-		this.cheekRight = cheekRight;
+        this.cheekLeft = cheekLeft;
+        this.cheekRight = cheekRight;
+
+        Log.v("Before Left: ",String.valueOf(cheekLeft[0])+cheekLeft[1]);
+        Log.v("Before Right: ",String.valueOf(cheekRight[0])+cheekRight[1]);
+        Log.v("Face Width",String.valueOf(this.face.getWidth()));
+        Log.v("Face Height",String.valueOf(this.face.getHeight()));
+        Log.v("Divide",String.valueOf(cheekLeft[0]/((double)face.getWidth())));
+        Log.v("Divide",String.valueOf(cheekLeft[1]/((double)face.getHeight())));
+        Log.v("Divide",String.valueOf(cheekRight[0]/((double)face.getWidth())));
+        Log.v("Divide",String.valueOf(cheekRight[1]/((double)face.getHeight())));
+
+        this.cheekLeft[0] = (int)((cheekLeft[0]/((double)face.getWidth()))*200);
+        this.cheekLeft[1] = (int)((cheekLeft[1]/(double)face.getHeight())*200);
+
+        this.cheekRight[0] = (int)((cheekRight[0]/((double)face.getWidth()))*200);
+        this.cheekRight[1] = (int)((cheekRight[1]/((double)face.getWidth()))*200);
+
+        Log.v("After Left: ",String.valueOf(this.cheekLeft[0])+this.cheekLeft[1]);
+        Log.v("After Right: ",String.valueOf(this.cheekRight[0])+this.cheekRight[1]);
 
         this.eyeLeft=getAccurateEyePosition(eyeLeft, 5);
         this.eyeRight=getAccurateEyePosition(eyeRight,5);
@@ -145,7 +163,7 @@ class FlagOverlay {
     //
     //@return: standard cropped bitmap of resolution 200 x 200
     private Bitmap getNormalizedImage(Bitmap randomImage) {
-		int bitmapOrientation = randomImage.getHeight() > randomImage.getWidth()? 1 : 
+		int bitmapOrientation = randomImage.getHeight() > randomImage.getWidth()? 1 :
 				randomImage.getHeight() < randomImage.getWidth()? -1 : 0;
 
 		switch (bitmapOrientation) {

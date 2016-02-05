@@ -72,12 +72,12 @@ public class FinalImageActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        InputStream stream = getResources().openRawResource(R.raw.face);
-        face = BitmapFactory.decodeStream(stream);
+        //InputStream stream = getResources().openRawResource(R.raw.face);
+        //face = BitmapFactory.decodeStream(stream);
 
         resizedFaceBitmap=getScaledFaceBitmap();
         resizedFlagBitmap=getScaledFlagBitmap();
-        normalizeCheekPosition();
+        //normalizeCheekPosition();
         AddFlagOnFace addFlagOnFace=new AddFlagOnFace();
         addFlagOnFace.execute("start");
     }
@@ -211,8 +211,8 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     Bitmap getScaledFaceBitmap(){
-        InputStream stream = getResources().openRawResource(R.raw.face);
-        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+        //InputStream stream = getResources().openRawResource(R.raw.face);
+        //Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
         InputStream tansparentStream = getResources().openRawResource(R.raw.image03);
         Bitmap transpBitmap = BitmapFactory.decodeStream(tansparentStream);
@@ -226,7 +226,7 @@ public class FinalImageActivity extends AppCompatActivity {
         bindViews();
 
         // Create a frame from the bitmap and run face detection on the frame.
-        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+        Frame frame = new Frame.Builder().setBitmap(face).build();
         SparseArray<Face> faces = detector.detect(frame);
 
         faceCharacteristics = new FaceCharacteristics(faces);
@@ -236,7 +236,7 @@ public class FinalImageActivity extends AppCompatActivity {
         Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
         Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
         eyes_pos = faceCharacteristics.getEyes_pos();
-        croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
+        croppedBitmap = faceCharacteristics.getCroppedBitmap(face);
         Frame frameCropped = new Frame.Builder().setBitmap(croppedBitmap).build();
         SparseArray<Face> faceCropped = detector.detect(frame);
 
@@ -249,11 +249,13 @@ public class FinalImageActivity extends AppCompatActivity {
         detector.release();
         int hieght=croppedBitmap.getHeight();
         int width=croppedBitmap.getWidth();
-        if(hieght>width){
+
+        return croppedBitmap;
+        /**if(hieght>width){
             return Bitmap.createScaledBitmap(croppedBitmap,200,200*hieght/width,false);
         }else{
             return Bitmap.createScaledBitmap(croppedBitmap,200*width/hieght,200,false);
-        }
+        }**/
 
     }
 
@@ -262,6 +264,7 @@ public class FinalImageActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeStream(stream);
         return Bitmap.createScaledBitmap(bitmap,200,200,false);
     }
+
 
     void normalizeCheekPosition(){
         cheeks_pos[0][0]=(cheeks_pos[0][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
