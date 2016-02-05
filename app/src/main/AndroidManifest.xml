@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <application android:allowBackup="true"
         android:label="@string/app_name"
-        android:icon="@drawable/ic_media_route_on_mono_dark"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
@@ -12,7 +12,7 @@
 
         <activity
             android:name=".PhotoActivity"
-            android:icon="@drawable/common_signin_btn_icon_focus_light">
+            android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +23,7 @@
 
         <activity
             android:name=".FlagDisplayActivity"
-            android:icon="@drawable/common_signin_btn_icon_focus_light">
+            android:icon="@mipmap/ic_launcher">
             android:parentActivityName=".PhotoActivity">
 
         </activity>
@@ -31,12 +31,12 @@
         <activity
             android:name=".PhotoDisplayActivity"
             android:parentActivityName=".PhotoActivity"
-            android:icon="@drawable/common_signin_btn_icon_focus_light">
+            android:icon="@mipmap/ic_launcher" >
         </activity>
 
         <activity
             android:name=".FinalImageActivity"
-            android:icon="@drawable/common_signin_btn_icon_focus_light">
+            android:icon="@mipmap/ic_launcher">
             android:parentActivityName=".FlagDisplayActivity">
         </activity>
 

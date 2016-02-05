@@ -39,7 +39,7 @@ public class PhotoActivity extends AppCompatActivity {
         footerText1=(TextView) findViewById(R.id.footer_text_1);
         footerText2=(TextView) findViewById(R.id.footer_text_2);
         setupStatusBar();
-        Typeface myTypeface = Typeface.createFromAsset(getAssets(), "fonts/header.ttf");
+        Typeface myTypeface = Typeface.createFromAsset(getAssets(), "fonts/keepclam.ttf");
         headerText1.setTypeface(myTypeface);
         headerText2.setTypeface(myTypeface);
         footerText1.setTypeface(myTypeface);

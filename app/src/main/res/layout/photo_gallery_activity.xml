@@ -26,8 +26,7 @@
         android:id="@+id/header_text_1"
         android:textColor="@color/white"
         android:gravity="center"
-        android:textSize="60sp"
-        android:paddingTop="10sp" />
+        android:textSize="50sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -38,7 +37,7 @@
         android:layout_above="@+id/footer_text_2"
         android:layout_alignParentStart="true"
         android:gravity="center"
-        android:textSize="25sp"
+        android:textSize="22sp"
         android:paddingBottom="5sp" />
 
     <TextView
@@ -50,8 +49,8 @@
         android:layout_above="@+id/gallary_button"
         android:layout_alignStart="@+id/gallary_button"
         android:gravity="center"
-        android:textSize="25sp"
-        android:paddingBottom="50sp" />
+        android:textSize="22sp"
+        android:paddingBottom="40sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -62,7 +61,7 @@
         android:layout_below="@+id/header_text_1"
         android:layout_alignEnd="@+id/gallary_button"
         android:gravity="center"
-        android:textSize="60sp" />
+        android:textSize="50sp" />
 
     <Button
         android:id="@+id/gallary_button"
