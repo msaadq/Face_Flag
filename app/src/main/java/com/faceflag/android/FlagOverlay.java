@@ -13,7 +13,7 @@ class FlagOverlay {
 
 	private final int DEFAULT_CHEECK_RANGE=2;
 
-	private int DEFAULT_GRADIENT_DECENT = 10;
+	private int DEFAULT_GRADIENT_DECENT = 2;
 	private int incrementalFactorX=6;
 	private int incrementalFactorY=1;
 
@@ -54,7 +54,7 @@ class FlagOverlay {
 
         this.SD = getStandardDeviation();
         this.rgb0 = getAverageColors();
-        this.modulus0=getModulus(rgb0[0],rgb0[1],rgb0[2]);
+        this.modulus0=getModulus(rgb0[0], rgb0[1], rgb0[2]);
     }
 
     //public get flag on face bitmap
@@ -87,6 +87,7 @@ class FlagOverlay {
     Bitmap drawEdgeCoordinates(){
         ArrayList<int[]> edgeCoordinates=new ArrayList<int[]>();
         edgeCoordinates=getEdgeCoordinates();
+        //edgeCoordinates=smoothenSquarePoints(edgeCoordinates);
         Bitmap flagFilter =getTransparentBitmap(200,200);
         for(int[] coordinate : edgeCoordinates) {
             flagFilter.setPixel(coordinate[0], coordinate[1], Color.argb(255,255,0,0));
@@ -445,7 +446,7 @@ class FlagOverlay {
     //
     //@return: transparent bitmap of said resolution
 	private Bitmap getTransparentBitmap(int xRes,int yRes){
-		Bitmap bmOverlay = Bitmap.createBitmap(xRes, yRes, null);
+		Bitmap bmOverlay = Bitmap.createBitmap(xRes, yRes, Bitmap.Config.ARGB_4444);
 		Canvas canvas = new Canvas(bmOverlay);
 		Paint paint = new Paint();
 		paint.setAlpha(0);
