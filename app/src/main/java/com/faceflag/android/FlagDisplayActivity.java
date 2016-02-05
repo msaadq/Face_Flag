@@ -98,19 +98,6 @@ public class FlagDisplayActivity extends AppCompatActivity {
         }
 
         else {
-            faceCharacteristics = new FaceCharacteristics(faces);
-
-            // Get face features
-            cheeks_pos = faceCharacteristics.getCheeks_pos();
-            eyes_pos = faceCharacteristics.getEyes_pos();
-            croppedBitmap = faceCharacteristics.getCroppedBitmap(bitmap);
-            //resizedBitmap = Bitmap.createScaledBitmap(croppedBitmap, 100, 100, false);
-
-            // Set bitmap in ImageView
-            //bitmap_image.setImageBitmap(resizedBitmap);
-
-            // Release resources associated with DetectorFace object
-            detector.release();
 
             gridView = (GridView) findViewById(R.id.gridView);
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());

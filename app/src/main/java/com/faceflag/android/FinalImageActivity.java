@@ -75,6 +75,8 @@ public class FinalImageActivity extends AppCompatActivity {
         //InputStream stream = getResources().openRawResource(R.raw.face);
         //face = BitmapFactory.decodeStream(stream);
 
+
+
         resizedFaceBitmap=getScaledFaceBitmap();
         resizedFlagBitmap=getScaledFlagBitmap();
         //normalizeCheekPosition();
@@ -193,10 +195,9 @@ public class FinalImageActivity extends AppCompatActivity {
 
     private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap> {
         protected Bitmap doInBackground(String... uris) {
-
-            FlagOverlay flagOverlay=new FlagOverlay(resizedFaceBitmap,resizedFlagBitmap,cheeks_pos[1],
-                    cheeks_pos[0],eyes_pos[1],eyes_pos[0]);
-            return flagOverlay.drawEdgeCoordinates();
+            FlagOverlay flagOverlay=new FlagOverlay(resizedFaceBitmap,resizedFlagBitmap,cheeks_pos[0],
+                    cheeks_pos[1],eyes_pos[0],eyes_pos[1]);
+            return flagOverlay.getFlagOnFaceRough();
             //FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
             //return faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
         }
@@ -231,31 +232,19 @@ public class FinalImageActivity extends AppCompatActivity {
 
         faceCharacteristics = new FaceCharacteristics(faces);
 
+        croppedBitmap = faceCharacteristics.getCroppedBitmap(face);
+
+
         // Get face features
         cheeks_pos = faceCharacteristics.getCheeks_pos();
-        Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
-        Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
+        Log.v(LOG_TAG,"Cheeks X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
+        Log.v(LOG_TAG,"Cheeks Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
+
         eyes_pos = faceCharacteristics.getEyes_pos();
-        croppedBitmap = faceCharacteristics.getCroppedBitmap(face);
-        Frame frameCropped = new Frame.Builder().setBitmap(croppedBitmap).build();
-        SparseArray<Face> faceCropped = detector.detect(frame);
 
-        faceCharacteristics = new FaceCharacteristics(faceCropped);
-
-        cheeks_pos=faceCharacteristics.getCheeks_pos();
-        eyes_pos=faceCharacteristics.getEyes_pos();
-        Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
-        Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
         detector.release();
-        int hieght=croppedBitmap.getHeight();
-        int width=croppedBitmap.getWidth();
 
         return croppedBitmap;
-        /**if(hieght>width){
-            return Bitmap.createScaledBitmap(croppedBitmap,200,200*hieght/width,false);
-        }else{
-            return Bitmap.createScaledBitmap(croppedBitmap,200*width/hieght,200,false);
-        }**/
 
     }
 

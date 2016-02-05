@@ -1,6 +1,9 @@
 package com.faceflag.android;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -29,33 +32,43 @@ public class FaceCharacteristics {
     public int[][] getCheeks_pos(){
         //for (int i = 0; i < mFaces.size(); ++i) {
 
-        for (int i = 0; i < 1; ++i) {
+        int pos_x = 0;
+        int pos_y = 0;
+
+        for (int i = 0; i < 1; i++) {
             Face face = faces.valueAt(i);
+            pos_x = (int) face.getPosition().x;
+            pos_y = (int) face.getPosition().y;
+
+            Log.v("Positions: ",String.valueOf(pos_x)+String.valueOf(pos_y));
+
 
             for (Landmark landmark : face.getLandmarks()) {
                 int cx = (int) (landmark.getPosition().x);
                 int cy = (int) (landmark.getPosition().y);
 
                 //Left Cheek
-                if (landmark.getType() == 1){
-                    Log.d("Left Cheek Value (x): ", String.valueOf(cx));
-                    Log.d("Left Cheek Value (y):", String.valueOf(cy));
-                    cheeks_pos[0][0] = cx;
-                    cheeks_pos[0][1] = cy;
+                if (landmark.getType() == 7){
+
+                    cheeks_pos[0][0] = cx - pos_x;
+                    cheeks_pos[0][1] = cy - pos_y;
+                    Log.v("Left Cheek x",String.valueOf(cheeks_pos[0][0]));
+                    Log.v("Left Cheek y",String.valueOf(cheeks_pos[0][1]));
                 }
 
                 // Right Cheek
-                if (landmark.getType() == 7){
-                    Log.d("Right Cheek Value (x): ", String.valueOf(cx));
-                    Log.d("Right Cheek Value (y):", String.valueOf(cy));
-                    cheeks_pos[1][0] = cx;
-                    cheeks_pos[1][1] = cy;
+                if (landmark.getType() == 1){
+
+                    cheeks_pos[1][0] = cx - pos_x;
+                    cheeks_pos[1][1] = cy - pos_y;
+                    Log.v("3",String.valueOf(cheeks_pos[1][0]));
+                    Log.v("4",String.valueOf(cheeks_pos[1][1]));
                 }
 
-                Log.d("Feature: ", String.valueOf(landmark.getType()));
             }
 
         }
+
         return cheeks_pos;
     }
 
@@ -94,20 +107,15 @@ public class FaceCharacteristics {
 
     public Bitmap getCroppedBitmap(Bitmap bitmap){
 
-        int offset_x, offset_y;
-
         // for (int i = 0; i < faces.size(); ++i) {
         Face face = faces.valueAt(0);
 
-        offset_x = (int)(face.getWidth());
-        offset_y = (int)(face.getHeight());
-
-        //}
-
-        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 10, 10,
-                offset_x, offset_y);
+        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, (int)face.getPosition().x,
+                (int)face.getPosition().y, (int)face.getWidth(), (int)face.getHeight());
 
         return croppedBitmap;
     }
+
+
 
 }

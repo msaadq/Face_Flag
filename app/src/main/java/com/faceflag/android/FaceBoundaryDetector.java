@@ -23,7 +23,6 @@ class FaceBoundaryDetector {
     static private int DEFAULT_BLUE_LOW = 4;
     static private int DEFAULT_BLUE_HIGH = 5;
 
-
     private int[] cheekOne;
     private int[] cheekTwo;
     private Bitmap face;

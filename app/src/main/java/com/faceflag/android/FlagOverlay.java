@@ -13,7 +13,7 @@ class FlagOverlay {
 
 	private final int DEFAULT_CHEECK_RANGE=2;
 
-	private int DEFAULT_GRADIENT_DECENT = 8;
+	private int DEFAULT_GRADIENT_DECENT = 3;
 	private int incrementalFactorX=6;
 	private int incrementalFactorY=1;
 
@@ -191,7 +191,7 @@ class FlagOverlay {
     	ArrayList<int[]> sharpCoordinates = new ArrayList<int[]>();
 
     	for (int j = 0; j < 200; j++) {
-    		for (int i = 2; i < 200; i++) {
+    		for (int i = 2; i < 199; i++) {
     			if(isBrighnessDifferenceRequired(i,j,i-1,j)) {
     				if(isSkinColored(i, j) && isSkinColored(i + 1, j)) {
     					sharpCoordinates.add(new int[]{i - 1, j});
@@ -284,7 +284,7 @@ class FlagOverlay {
 
 		//return (red / abc[0] == green / abc[1]) && (red / abc[0] == blue / abc[2]);
 
-        Log.v("FLAGOVERLAY", "Determining if isSkinColored");
+        //Log.v("FLAGOVERLAY", "Determining if isSkinColored");
         // EQUATION OF CONE
         return (
         /*This should be*/                             ((SD * modulusX)/modulus0)
@@ -491,5 +491,17 @@ class FlagOverlay {
         variance = sum / (double) array.size();
 
         return Math.sqrt(variance);
+    }
+
+    Bitmap getFlagOnFaceRough(){
+        Bitmap filter=getTransparentBitmap(200,200);
+        for(int i=0;i<200;i++){
+            for(int j=0;j<200;j++){
+                if(isSkinColored(i,j)){
+                    filter.setPixel(i,j,flag.getPixel(i,j));
+                }
+            }
+        }
+        return overlay(face,filter);
     }
 }
