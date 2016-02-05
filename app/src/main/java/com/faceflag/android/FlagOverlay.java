@@ -5,24 +5,32 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.util.Log;
 
 import java.util.ArrayList;
 
 class FlagOverlay {
 
-	static private final int DEFAULT_CHEECK_RANGE=2;
+	private final int DEFAULT_CHEECK_RANGE=2;
 
-	static private int DEFAULT_GRADIENT_DECENT = 10;
-	static private int incrementalFactorX=6;
-	static private int incrementalFactorY=1;
+	private int DEFAULT_GRADIENT_DECENT = 10;
+	private int incrementalFactorX=6;
+	private int incrementalFactorY=1;
 
     final private int DEFAULT_BOTTOM_BRIGHTNESS_LIMIT_OF_SKIN_COLOR= 50;
     final private int DEFAULT_TOP_BRIGHTNESS_LIMIT_OF_SKIN_COLOR= 255;
 
-    static final private int DEFAULT_EYE_OPENING_WIDTH=7;
-    static final private int DEFAULT_EYE_OPENING_HIEGHT=2;
-	
-	private Bitmap face;
+    final private int DEFAULT_EYE_OPENING_WIDTH=7;
+    final private int DEFAULT_EYE_OPENING_HIEGHT=2;
+
+    private double SD;
+    private int[] rgb0;
+    private double modulus0;
+
+    final private double cheekWidthByTwo = DEFAULT_CHEECK_RANGE * incrementalFactorX;
+    final private double cheekHeightByTwo = DEFAULT_CHEECK_RANGE * incrementalFactorY;
+
+    private Bitmap face;
 	private Bitmap flag;
 
 	private int[] cheekLeft;
@@ -41,9 +49,13 @@ class FlagOverlay {
 		this.cheekLeft = cheekLeft;
 		this.cheekRight = cheekRight;
 
-        this.eyeLeft=getAccurateEyePosition(eyeLeft,5);
+        this.eyeLeft=getAccurateEyePosition(eyeLeft, 5);
         this.eyeRight=getAccurateEyePosition(eyeRight,5);
-	}
+
+        this.SD = getStandardDeviation();
+        this.rgb0 = getAverageColors();
+        this.modulus0=getModulus(rgb0[0],rgb0[1],rgb0[2]);
+    }
 
     //public get flag on face bitmap
     //
@@ -243,15 +255,17 @@ class FlagOverlay {
     //
     //@returns: whether that pixel is skin colored or not
     private boolean isSkinColored(int x, int y) {
-        double SD=getStandardDeviation();
-        int[] rgb0=getAverageColors();
-        int[] rgbx=new int[]{ Color.red(face.getPixel(x, y)) , Color.green(face.getPixel(x, y)) , Color.blue(face.getPixel(x, y))};
-        double modulus0=getModulus(rgb0[0],rgb0[1],rgb0[2]);
+
+
+        int[] rgbx=new int[]{ Color.red(face.getPixel(x, y)) ,
+                Color.green(face.getPixel(x, y)) , Color.blue(face.getPixel(x, y))};
+
         double modulusX=getModulus(rgbx[0],rgbx[1],rgbx[2]);
         double dotProductRGB0andRGBX = rgb0[0]*rgbx[0] + rgb0[1]*rgbx[1] + rgb0[2]*rgbx[2];
-		
+
 		//return (red / abc[0] == green / abc[1]) && (red / abc[0] == blue / abc[2]);
 
+        Log.v("FLAGOVERLAY", "Determining if isSkinColored");
         // EQUATION OF CONE
         return (
         /*This should be*/                             ((SD * modulusX)/modulus0)
@@ -296,16 +310,17 @@ class FlagOverlay {
         ArrayList<Integer> allGreens = new ArrayList<>();
         ArrayList<Integer> allBlues = new ArrayList<>();
 
-        for(int i = (int)(cheekLeft[0] - DEFAULT_CHEECK_RANGE * incrementalFactorX); i <= cheekLeft[0] + DEFAULT_CHEECK_RANGE * incrementalFactorX; i++) {
-            for(int j = (int)(cheekLeft[1] - DEFAULT_CHEECK_RANGE * incrementalFactorY); j <= cheekLeft[1] + DEFAULT_CHEECK_RANGE * incrementalFactorY; j++) {
+
+        for(int i = (int)(cheekLeft[0] - cheekWidthByTwo); i <= cheekLeft[0] + cheekWidthByTwo; i++) {
+            for(int j = (int)(cheekLeft[1] - cheekHeightByTwo); j <= cheekLeft[1] + cheekHeightByTwo; j++) {
                 allReds.add(Color.red(face.getPixel(i, j)));
                 allGreens.add(Color.green(face.getPixel(i, j)));
                 allBlues.add(Color.blue(face.getPixel(i, j)));
             }
         }
 
-        for(int i = (int)(cheekRight[0] - DEFAULT_CHEECK_RANGE * incrementalFactorX); i <= cheekRight[0] + DEFAULT_CHEECK_RANGE * incrementalFactorX; i++) {
-            for(int j = (int)(cheekRight[1] - DEFAULT_CHEECK_RANGE * incrementalFactorY); j <= cheekRight[1] + DEFAULT_CHEECK_RANGE * incrementalFactorY; j++) {
+        for(int i = (int)(cheekRight[0] - cheekWidthByTwo); i <= cheekRight[0] + cheekWidthByTwo; i++) {
+            for(int j = (int)(cheekRight[1] - cheekHeightByTwo); j <= cheekRight[1] + cheekHeightByTwo; j++) {
                 allReds.add(Color.red(face.getPixel(i, j)));
                 allGreens.add(Color.green(face.getPixel(i, j)));
                 allBlues.add(Color.blue(face.getPixel(i, j)));
@@ -327,16 +342,16 @@ class FlagOverlay {
         ArrayList<Integer> allGreens = new ArrayList<>();
         ArrayList<Integer> allBlues = new ArrayList<>();
 
-        for(int i = (int)(cheekLeft[0] - DEFAULT_CHEECK_RANGE * incrementalFactorX); i <= cheekLeft[0] + DEFAULT_CHEECK_RANGE * incrementalFactorX; i++) {
-            for(int j = (int)(cheekLeft[1] - DEFAULT_CHEECK_RANGE * incrementalFactorY); j <= cheekLeft[1] + DEFAULT_CHEECK_RANGE * incrementalFactorY; j++) {
+        for(int i = (int)(cheekLeft[0] - cheekWidthByTwo); i <= cheekLeft[0] + cheekWidthByTwo; i++) {
+            for(int j = (int)(cheekLeft[1] - cheekHeightByTwo); j <= cheekLeft[1] + cheekHeightByTwo; j++) {
                 allReds.add(Color.red(face.getPixel(i, j)));
                 allGreens.add(Color.green(face.getPixel(i, j)));
                 allBlues.add(Color.blue(face.getPixel(i, j)));
             }
         }
 
-        for(int i = (int)(cheekRight[0] - DEFAULT_CHEECK_RANGE * incrementalFactorX); i <= cheekRight[0] + DEFAULT_CHEECK_RANGE * incrementalFactorX; i++) {
-            for(int j = (int)(cheekRight[1] - DEFAULT_CHEECK_RANGE * incrementalFactorY); j <= cheekRight[1] + DEFAULT_CHEECK_RANGE * incrementalFactorY; j++) {
+        for(int i = (int)(cheekRight[0] - cheekWidthByTwo); i <= cheekRight[0] + cheekWidthByTwo; i++) {
+            for(int j = (int)(cheekRight[1] - cheekHeightByTwo); j <= cheekRight[1] + cheekHeightByTwo; j++) {
                 allReds.add(Color.red(face.getPixel(i, j)));
                 allGreens.add(Color.green(face.getPixel(i, j)));
                 allBlues.add(Color.blue(face.getPixel(i, j)));
