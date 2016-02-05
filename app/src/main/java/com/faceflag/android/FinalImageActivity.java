@@ -46,13 +46,18 @@ public class FinalImageActivity extends AppCompatActivity {
     int cheeks_pos[][];
     int eyes_pos[][];
     int nose_pos[];
+    int croppingMetrics[];
+    Double eulerY;
+    Double eulerZ;
     String flagTitle;
     Bitmap resizedFaceBitmap;
     Bitmap resizedFlagBitmap;
     Bitmap croppedBitmap;
     Bitmap face;
     Bitmap transparent;
-    Bitmap flag;
+    Bitmap flagLeft;
+    Bitmap flagRight;
+    Bitmap backgroundImage;
     FaceCharacteristics faceCharacteristics;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -70,23 +75,39 @@ public class FinalImageActivity extends AppCompatActivity {
         String selectedImage=getIntent().getStringExtra("URI");
         flagTitle = getIntent().getStringExtra("title");
 
-        int imageId = R.raw.image02;
-
+        int imageIdLeft = R.raw.image02;
+        int imageIdRight = R.raw.image02;
+        int imageIdBackground=R.raw.image02;
         if(flagTitle.equals("PESHAWAR ZALMI")){
-            imageId = R.raw.image_4;
+            imageIdLeft = R.raw.peshawar_left;
+            imageIdRight=R.raw.peshawar_right;
+            imageIdBackground=R.raw.team_peshwar;
         }else if(flagTitle.equals("ISLAMABAD UNITED")){
-            imageId = R.raw.image_1;
+            imageIdLeft = R.raw.islamabad_left;
+            imageIdRight=R.raw.islamabad_right;
+            imageIdBackground=R.raw.team_islamabad;
         }else if(flagTitle.equals("KARACHI KINGS")){
-            imageId = R.raw.image_2;
+            imageIdLeft = R.raw.karachi_left;
+            imageIdRight=R.raw.karachi_right;
+            imageIdBackground=R.raw.team_karachi;
         }else if(flagTitle.equals("LAHORE QALANDERS")){
-            imageId = R.raw.image_3;
+            imageIdLeft = R.raw.lahore_left;
+            imageIdRight=R.raw.lahore_right;
+            imageIdBackground=R.raw.team_lahore;
         }else if(flagTitle.equals("QUETTA GLADIATORS")){
-            imageId = R.raw.image_5;
+            imageIdLeft = R.raw.quetta_left;
+            imageIdRight=R.raw.quetta_right;
+            imageIdBackground=R.raw.team_quetta;
         }
 
-        InputStream stream = getResources().openRawResource(imageId);
-        flag = BitmapFactory.decodeStream(stream);
+        InputStream streamLeft = getResources().openRawResource(imageIdLeft);
+        flagLeft = BitmapFactory.decodeStream(streamLeft);
 
+        InputStream streamRight = getResources().openRawResource(imageIdRight);
+        flagRight = BitmapFactory.decodeStream(streamRight);
+
+        InputStream streamBackground = getResources().openRawResource(imageIdBackground);
+        backgroundImage = BitmapFactory.decodeStream(streamBackground);
 
         try {
             face= MediaStore.Images.Media.getBitmap(this.getContentResolver(),
@@ -198,7 +219,7 @@ public class FinalImageActivity extends AppCompatActivity {
         sendIntent.setAction(Intent.ACTION_SEND);
         Uri uri = Uri.parse(file.getPath());
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting"+flagTitle+"! Get " +
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting" + flagTitle + "! Get " +
                 "your team's flag here: http://playstore.android.com/FaceFlag");
         sendIntent.setType("image/*");
         startActivity(Intent.createChooser(sendIntent, "share"));
@@ -216,8 +237,8 @@ public class FinalImageActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap> {
-        protected Bitmap doInBackground(String... uris) {
+    private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap[]> {
+        protected Bitmap[] doInBackground(String... uris) {
 
             FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
                     .setTrackingEnabled(false)
@@ -236,9 +257,17 @@ public class FinalImageActivity extends AppCompatActivity {
             cheeks_pos = faceCharacteristics.getCheeksOriginalPos();
             eyes_pos = faceCharacteristics.getEyesOriginalPos();
             nose_pos = faceCharacteristics.getNoseOriginalPos();
-
-            CheekFlagOverlay cheekFlagOverlay = new CheekFlagOverlay(face,flag,cheeks_pos[0],
-                    cheeks_pos[1],nose_pos,eyes_pos[0],eyes_pos[1]);
+            eulerY=faceCharacteristics.getFaceEulerY();
+            eulerZ=faceCharacteristics.getFaceEulerZ();
+            if(eulerY==null){
+                eulerY=0.0;
+            }
+            if(eulerZ==null){
+                eulerZ=0.0;
+            }
+            croppingMetrics=faceCharacteristics.getCroppingMetrics();
+            CheekFlagOverlay cheekFlagOverlay = new CheekFlagOverlay(backgroundImage,face,flagLeft,flagRight,cheeks_pos[0],
+                    cheeks_pos[1],nose_pos,eyes_pos[0],eyes_pos[1],eulerY,eulerZ,croppingMetrics);
 
             return cheekFlagOverlay.overlayFlag();
 
@@ -252,9 +281,9 @@ public class FinalImageActivity extends AppCompatActivity {
         protected void onProgressUpdate(Integer... progress) {
         }
 
-        protected void onPostExecute(Bitmap result) {
-            SaveImage(result);
-            imageView.setImageBitmap(result);
+        protected void onPostExecute(Bitmap[] result) {
+            SaveImage(result[1]);
+            imageView.setImageBitmap(result[1]);
         }
     }
 
@@ -366,4 +395,5 @@ public class FinalImageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 }

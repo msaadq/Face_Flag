@@ -80,25 +80,56 @@ public class FlagDisplayActivity extends AppCompatActivity {
         SparseArray<Face> faces = detector.detect(frame);
 
         Log.v("Faces Detected: ",String.valueOf(faces.size()));
+        try {
+            if (faces.size() == 0) {
+                Log.v("Inside ", "Zero Condition");
 
-        if (faces.size() == 0){
-            Log.v("Inside ", "Zero Condition");
+                //Create intent
+                Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
+                Toast.makeText(this, "We couldn't detect any faces. Please try uploading another " +
+                        "image", Toast.LENGTH_LONG).show();
 
-            //Create intent
-            Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
-            Toast.makeText(this, "We couldn't detect any faces. Please try uploading another " +
-                            "image", Toast.LENGTH_LONG).show();
+                //Terminate the already existing activities in stack
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            //Terminate the already existing activities in stack
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //Start Photo activity
+                startActivity(intent);
+            } else if (faces.get(0).getEulerY() > 15 || faces.get(0).getEulerY() < -15) {
+                //Create intent
+                Intent intent = new Intent(FlagDisplayActivity.this, PhotoActivity.class);
+                Toast.makeText(this, "Front view in the image not found. Try uploading an image with a front view"
+                        , Toast.LENGTH_LONG).show();
 
-            //Start Photo activity
-            startActivity(intent);
-        }
+                //Terminate the already existing activities in stack
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        else {
+                //Start Photo activity
+                startActivity(intent);
+            }
+            else {
 
+                gridView = (GridView) findViewById(R.id.gridView);
+                gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
+                gridView.setAdapter(gridAdapter);
+
+                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                        ImageItem item = (ImageItem) parent.getItemAtPosition(position);
+
+                        //Create intent
+                        Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
+                        Log.v("Image: ", String.valueOf(item.getTitle()));
+                        intent.putExtra("title", String.valueOf(item.getTitle()));
+                        intent.putExtra("URI", selectedImage.toString());
+                        //Start details activity
+                        startActivity(intent);
+                    }
+                });
+            }
+        }catch (Exception e){
+            Log.v(LOG_TAG,e.toString());
             gridView = (GridView) findViewById(R.id.gridView);
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
             gridView.setAdapter(gridAdapter);
@@ -111,12 +142,14 @@ public class FlagDisplayActivity extends AppCompatActivity {
                     Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
                     Log.v("Image: ", String.valueOf(item.getTitle()));
                     intent.putExtra("title", String.valueOf(item.getTitle()));
-                    intent.putExtra("URI",selectedImage.toString());
+                    intent.putExtra("URI", selectedImage.toString());
                     //Start details activity
                     startActivity(intent);
                 }
             });
         }
+
+
     }
 
     /**

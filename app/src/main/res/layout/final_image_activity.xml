@@ -15,12 +15,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="140sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
+        android:layout_height="100sp"
         android:measureWithLargestChild="false"
         android:nestedScrollingEnabled="false"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:background="#232569c9">
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -54,6 +55,42 @@
             android:paddingLeft="80sp"
             android:paddingTop="100sp"
             android:paddingRight="100sp"
+            android:paddingBottom="100sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100sp"
+        android:measureWithLargestChild="false"
+        android:nestedScrollingEnabled="false"
+        android:gravity="center"
+        android:background="#232569c9"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#00ffffff"
+            android:src="@mipmap/share"
+            android:tint="@color/white"
+            android:id="@+id/view_1"
+            android:clickable="false"
+            android:paddingLeft="130sp"
+            android:paddingTop="70sp"
+            android:paddingRight="70sp"
+            android:paddingBottom="70sp" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@mipmap/save"
+            android:background="#00ffffff"
+            android:tint="@color/white"
+            android:id="@+id/view_2"
+            android:paddingLeft="80sp"
+            android:paddingTop="100sp"
+            android:paddingRight="140sp"
             android:paddingBottom="100sp" />
     </LinearLayout>
 </RelativeLayout>

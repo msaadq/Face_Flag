@@ -19,6 +19,8 @@ public class FaceCharacteristics {
     int cheeks_pos[][];
     int eyes_pos[][];
     int nose_pos[];
+    Double eulerZ;
+    Double eulerY;
     SparseArray<Face> faces;
 
     FaceCharacteristics(SparseArray<Face> faces){
@@ -41,7 +43,6 @@ public class FaceCharacteristics {
             Face face = faces.valueAt(i);
             pos_x = (int) face.getPosition().x;
             pos_y = (int) face.getPosition().y;
-
             Log.v("Positions: ",String.valueOf(pos_x)+String.valueOf(pos_y));
 
 
@@ -208,5 +209,27 @@ public class FaceCharacteristics {
     }
 
 
+    public Double getFaceEulerY(){
+        for(int i=0;i<1;i++){
+            Face face = faces.valueAt(i);
+            eulerY=Double.valueOf(face.getEulerY());
+        }
+
+        return  eulerY;
+    }
+
+    public Double getFaceEulerZ(){
+        for(int i=0;i<1;i++){
+            Face face = faces.valueAt(i);
+            eulerY=Double.valueOf(face.getEulerZ());
+        }
+
+        return  eulerZ;
+    }
+    public int[] getCroppingMetrics(){
+        Face face=faces.valueAt(0);
+        return new int[]{(int)face.getPosition().x,
+                (int)face.getPosition().y, (int)face.getWidth(), (int)face.getHeight()};
+    }
 
 }
