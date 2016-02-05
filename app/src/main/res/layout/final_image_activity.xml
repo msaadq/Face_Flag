@@ -39,9 +39,10 @@
             android:layout_weight="1"
             android:background="#00ffffff"
             android:src="@mipmap/share"
-            android:tint="#006aff"
+            android:tint="@color/white"
             android:padding="70sp"
-            android:id="@+id/share_button"/>
+            android:id="@+id/share_button"
+            android:clickable="false" />
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

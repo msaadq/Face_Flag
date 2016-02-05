@@ -194,8 +194,11 @@ public class FinalImageActivity extends AppCompatActivity {
     private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap> {
         protected Bitmap doInBackground(String... uris) {
 
-            FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
-            return faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
+            FlagOverlay flagOverlay=new FlagOverlay(resizedFaceBitmap,resizedFlagBitmap,cheeks_pos[1],
+                    cheeks_pos[0],eyes_pos[1],eyes_pos[0]);
+            return flagOverlay.drawEdgeCoordinates();
+            //FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
+            //return faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
         }
 
         protected void onProgressUpdate(Integer... progress) {
@@ -244,13 +247,20 @@ public class FinalImageActivity extends AppCompatActivity {
         Log.v(LOG_TAG,"X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
         Log.v(LOG_TAG,"Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
         detector.release();
-        return Bitmap.createScaledBitmap(croppedBitmap,100,100,false);
+        int hieght=croppedBitmap.getHeight();
+        int width=croppedBitmap.getWidth();
+        if(hieght>width){
+            return Bitmap.createScaledBitmap(croppedBitmap,200,200*hieght/width,false);
+        }else{
+            return Bitmap.createScaledBitmap(croppedBitmap,200*width/hieght,200,false);
+        }
+
     }
 
     Bitmap getScaledFlagBitmap(){
         InputStream stream = getResources().openRawResource(R.raw.image_1);
         Bitmap bitmap = BitmapFactory.decodeStream(stream);
-        return Bitmap.createScaledBitmap(bitmap,100,100,false);
+        return Bitmap.createScaledBitmap(bitmap,200,200,false);
     }
 
     void normalizeCheekPosition(){

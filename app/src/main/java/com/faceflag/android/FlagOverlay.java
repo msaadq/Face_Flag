@@ -72,6 +72,15 @@ class FlagOverlay {
         return avatarCoordinates;
     }
 
+    Bitmap drawEdgeCoordinates(){
+        ArrayList<int[]> edgeCoordinates=new ArrayList<int[]>();
+        edgeCoordinates=getEdgeCoordinates();
+        Bitmap flagFilter =getTransparentBitmap(200,200);
+        for(int[] coordinate : edgeCoordinates) {
+            flagFilter.setPixel(coordinate[0], coordinate[1], Color.argb(255,255,0,0));
+        }
+        return overlay(face,flagFilter);
+    }
     //apply flag filter on face
     //
     //This function applys overlays the flag pixel by pixel at all the avatar coordinates
