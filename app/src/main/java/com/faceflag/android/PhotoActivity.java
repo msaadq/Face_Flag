@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Bundle;import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,9 +21,15 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class PhotoActivity extends AppCompatActivity {
 
     public static final int GET_FROM_GALLERY = 3;
+    public static final int REQUEST_TAKE_PHOTO = 1;
 
     private TextView headerText1;
     private TextView headerText2;
@@ -48,9 +57,9 @@ public class PhotoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.v("PhotoActivity", "Clicked Gallery");
-                startActivityForResult(new Intent
-                        (Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
-
+                //startActivityForResult(new Intent
+                //        (Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+                dispatchTakePictureIntent();
             }
         });
     }
@@ -100,6 +109,7 @@ public class PhotoActivity extends AppCompatActivity {
         }
         return result;
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -121,5 +131,49 @@ public class PhotoActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private String dispatchTakePictureIntent() {
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+                String photoPath = "file:" + photoFile.getAbsolutePath();
+                Log.v("Photo Path",photoPath);
+                return dispatchTakePictureIntent();
+
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                Log.v("PhotoActivity","Image Captured.");
+            }
+        }
+        return null;
+    }
+
+    private File createImageFile() throws IOException {
+
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return image;
+    }
+
 
 }
