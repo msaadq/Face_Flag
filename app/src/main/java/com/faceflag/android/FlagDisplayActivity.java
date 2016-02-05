@@ -110,7 +110,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
                     //Create intent
                     Intent intent = new Intent(FlagDisplayActivity.this, FinalImageActivity.class);
                     Log.v("Image: ", String.valueOf(item.getTitle()));
-                    intent.putExtra("title", item.getTitle());
+                    intent.putExtra("title", String.valueOf(item.getTitle()));
                     intent.putExtra("URI",selectedImage.toString());
                     //Start details activity
                     startActivity(intent);

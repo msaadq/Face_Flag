@@ -18,6 +18,7 @@ public class FaceCharacteristics {
 
     int cheeks_pos[][];
     int eyes_pos[][];
+    int nose_pos[];
     SparseArray<Face> faces;
 
     FaceCharacteristics(SparseArray<Face> faces){
@@ -27,6 +28,7 @@ public class FaceCharacteristics {
         // left cheek. Similarly, y is followed by x.
         cheeks_pos = new int[2][2];
         eyes_pos = new int[2][2];
+        nose_pos = new int[2];
     }
 
     public int[][] getCheeks_pos(){
@@ -104,6 +106,95 @@ public class FaceCharacteristics {
         }
         return eyes_pos;
     }
+
+    public int[][] getCheeksOriginalPos(){
+        //for (int i = 0; i < mFaces.size(); ++i) {
+        for (int i = 0; i < 1; ++i) {
+            Face face = faces.valueAt(i);
+
+            for (Landmark landmark : face.getLandmarks()) {
+                int cx = (int) (landmark.getPosition().x);
+                int cy = (int) (landmark.getPosition().y);
+
+                //Left Cheek
+                if (landmark.getType() == 7){
+                    Log.d("Left Cheek Value (x): ", String.valueOf(cx));
+                    Log.d("Left Cheek Value (y):", String.valueOf(cy));
+                    cheeks_pos[0][0] = cx;
+                    cheeks_pos[0][1] = cy;
+                }
+
+                // Right Cheek
+                if (landmark.getType() == 1){
+                    Log.d("Right Cheek Value (x): ", String.valueOf(cx));
+                    Log.d("Right Cheek Value (y):", String.valueOf(cy));
+                    cheeks_pos[1][0] = cx;
+                    cheeks_pos[1][1] = cy;
+                }
+
+            }
+
+        }
+        return cheeks_pos;
+    }
+
+
+    public int[][] getEyesOriginalPos(){
+        //for (int i = 0; i < mFaces.size(); ++i) {
+        for (int i = 0; i < 1; ++i) {
+            Face face = faces.valueAt(i);
+
+            for (Landmark landmark : face.getLandmarks()) {
+                int cx = (int) (landmark.getPosition().x);
+                int cy = (int) (landmark.getPosition().y);
+
+                //Left Eye
+                if (landmark.getType() == 10){
+                    Log.d("Left Eye Value (x): ", String.valueOf(cx));
+                    Log.d("Left Eye Value (y):", String.valueOf(cy));
+                    eyes_pos[0][0] = cx;
+                    eyes_pos[0][1] = cy;
+                }
+
+                // Right Eye
+                if (landmark.getType() == 4){
+                    Log.d("Right Eye Value (x): ", String.valueOf(cx));
+                    Log.d("Right Eye Value (y):", String.valueOf(cy));
+                    eyes_pos[1][0] = cx;
+                    eyes_pos[1][1] = cy;
+                }
+
+                Log.d("Feature: ", String.valueOf(landmark.getType()));
+            }
+
+        }
+        return eyes_pos;
+    }
+
+    public int[] getNoseOriginalPos(){
+        //for (int i = 0; i < mFaces.size(); ++i) {
+        for (int i = 0; i < 1; ++i) {
+            Face face = faces.valueAt(i);
+
+            for (Landmark landmark : face.getLandmarks()) {
+                int cx = (int) (landmark.getPosition().x);
+                int cy = (int) (landmark.getPosition().y);
+
+                //Nose
+                if (landmark.getType() == 6){
+                    Log.d("Nose Value (x): ", String.valueOf(cx));
+                    Log.d("Nose Value (y):", String.valueOf(cy));
+                    nose_pos[0] = cx;
+                    nose_pos[1] = cy;
+                }
+
+                Log.d("Feature: ", String.valueOf(landmark.getType()));
+            }
+
+        }
+        return nose_pos;
+    }
+
 
     public Bitmap getCroppedBitmap(Bitmap bitmap){
 

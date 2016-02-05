@@ -45,6 +45,8 @@ public class FinalImageActivity extends AppCompatActivity {
     ImageButton saveButton;
     int cheeks_pos[][];
     int eyes_pos[][];
+    int nose_pos[];
+    String flagTitle;
     Bitmap resizedFaceBitmap;
     Bitmap resizedFlagBitmap;
     Bitmap croppedBitmap;
@@ -66,6 +68,26 @@ public class FinalImageActivity extends AppCompatActivity {
         bindViews();
         setOnClickListerners();
         String selectedImage=getIntent().getStringExtra("URI");
+        flagTitle = getIntent().getStringExtra("title");
+
+        int imageId = R.raw.image02;
+
+        if(flagTitle.equals("PESHAWAR ZALMI")){
+            imageId = R.raw.image_4;
+        }else if(flagTitle.equals("ISLAMABAD UNITED")){
+            imageId = R.raw.image_1;
+        }else if(flagTitle.equals("KARACHI KINGS")){
+            imageId = R.raw.image_2;
+        }else if(flagTitle.equals("LAHORE QALANDERS")){
+            imageId = R.raw.image_3;
+        }else if(flagTitle.equals("QUETTA GLADIATORS")){
+            imageId = R.raw.image_5;
+        }
+
+        InputStream stream = getResources().openRawResource(imageId);
+        flag = BitmapFactory.decodeStream(stream);
+
+
         try {
             face= MediaStore.Images.Media.getBitmap(this.getContentResolver(),
                     Uri.parse(selectedImage));
@@ -77,11 +99,12 @@ public class FinalImageActivity extends AppCompatActivity {
 
 
 
-        resizedFaceBitmap=getScaledFaceBitmap();
-        resizedFlagBitmap=getScaledFlagBitmap();
+        //resizedFaceBitmap=getScaledFaceBitmap();
+        //resizedFlagBitmap=getScaledFlagBitmap();
         //normalizeCheekPosition();
         AddFlagOnFace addFlagOnFace=new AddFlagOnFace();
         addFlagOnFace.execute("start");
+
     }
 
     void bindViews(){
@@ -175,7 +198,7 @@ public class FinalImageActivity extends AppCompatActivity {
         sendIntent.setAction(Intent.ACTION_SEND);
         Uri uri = Uri.parse(file.getPath());
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting Peshawar Zalmi! Get " +
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting"+flagTitle+"! Get " +
                 "your team's flag here: http://playstore.android.com/FaceFlag");
         sendIntent.setType("image/*");
         startActivity(Intent.createChooser(sendIntent, "share"));
@@ -195,9 +218,33 @@ public class FinalImageActivity extends AppCompatActivity {
 
     private class AddFlagOnFace extends AsyncTask<String, Integer, Bitmap> {
         protected Bitmap doInBackground(String... uris) {
-            FlagOverlay flagOverlay=new FlagOverlay(resizedFaceBitmap,resizedFlagBitmap,cheeks_pos[0],
-                    cheeks_pos[1],eyes_pos[0],eyes_pos[1]);
-            return flagOverlay.getFlagOnFaceRough();
+
+            FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
+                    .setTrackingEnabled(false)
+                    .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                    .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                    .build();
+
+            bindViews();
+
+            // Create a frame from the bitmap and run face detection on the frame.
+            Frame frame = new Frame.Builder().setBitmap(face).build();
+            SparseArray<Face> faces = detector.detect(frame);
+
+            faceCharacteristics = new FaceCharacteristics(faces);
+
+            cheeks_pos = faceCharacteristics.getCheeksOriginalPos();
+            eyes_pos = faceCharacteristics.getEyesOriginalPos();
+            nose_pos = faceCharacteristics.getNoseOriginalPos();
+
+            CheekFlagOverlay cheekFlagOverlay = new CheekFlagOverlay(face,flag,cheeks_pos[0],
+                    cheeks_pos[1],nose_pos,eyes_pos[0],eyes_pos[1]);
+
+            return cheekFlagOverlay.overlayFlag();
+
+            //FlagOverlay flagOverlay=new FlagOverlay(resizedFaceBitmap,resizedFlagBitmap,cheeks_pos[0],
+            //        cheeks_pos[1],eyes_pos[0],eyes_pos[1]);
+            //return flagOverlay.getFlagOnFaceRough();
             //FaceBoundaryDetector faceBoundaryDetector=new FaceBoundaryDetector(resizedFaceBitmap,resizedFlagBitmap);
             //return faceBoundaryDetector.getFaceWithFlag(resizedFaceBitmap, resizedFlagBitmap, cheeks_pos,eyes_pos,transparent);
         }
