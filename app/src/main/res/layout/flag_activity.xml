@@ -58,7 +58,6 @@
         android:focusable="true"
         android:clickable="true"
         android:paddingLeft="0dp"
-        android:paddingRight="10dp"
         android:scrollbarSize="10dp"
         android:scrollbarThumbVertical="@drawable/custom_scroll_style"
         android:background="#ffffff" />

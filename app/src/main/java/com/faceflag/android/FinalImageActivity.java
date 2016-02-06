@@ -54,6 +54,7 @@ public class FinalImageActivity extends AppCompatActivity {
     ImageButton saveButton;
     ImageButton view1;
     ImageButton view2;
+    ImageButton backButton;
     ProgressBar progressBar;
     Boolean isInVisible;
     int cheeks_pos[][];
@@ -74,6 +75,7 @@ public class FinalImageActivity extends AppCompatActivity {
     LinearLayout layoutTop;
     LinearLayout layoutBottom;
     RelativeLayout relativeLayout;
+    boolean isLoading;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -90,9 +92,9 @@ public class FinalImageActivity extends AppCompatActivity {
         String selectedImage=getIntent().getStringExtra("URI");
         flagTitle = getIntent().getStringExtra("title");
 
-        int imageIdLeft = R.raw.image02;
-        int imageIdRight = R.raw.image02;
-        int imageIdBackground=R.raw.image02;
+        int imageIdLeft = R.raw.bean_right;
+        int imageIdRight = R.raw.bean_left;
+        int imageIdBackground=R.raw.team_bean;
         if(flagTitle.equals("PESHAWAR ZALMI")){
             imageIdLeft = R.raw.peshawar_left;
             imageIdRight=R.raw.peshawar_right;
@@ -114,7 +116,7 @@ public class FinalImageActivity extends AppCompatActivity {
             imageIdRight=R.raw.quetta_right;
             imageIdBackground=R.raw.team_quetta;
         }
-
+        
         InputStream streamLeft = getResources().openRawResource(imageIdLeft);
         flagLeft = BitmapFactory.decodeStream(streamLeft);
 
@@ -145,16 +147,19 @@ public class FinalImageActivity extends AppCompatActivity {
 
     void bindViews(){
 
+        backButton=(ImageButton) findViewById(R.id.back_button);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#2569c9"),
                 PorterDuff.Mode.MULTIPLY);
         progressBar.setVisibility(View.VISIBLE);
 
+        isLoading=true;
         layoutTop = (LinearLayout) findViewById(R.id.layout_top);
         layoutBottom = (LinearLayout) findViewById(R.id.layout_bottom);
-        layoutTop.setVisibility(View.VISIBLE);
-        layoutBottom.setVisibility(View.VISIBLE);
-        isInVisible=false;
+        layoutTop.setVisibility(View.INVISIBLE);
+        layoutBottom.setVisibility(View.INVISIBLE);
+
+        isInVisible=true;
 
         relativeLayout = (RelativeLayout) findViewById(R.id.main_relative_layout);
         imageView=(ImageView) findViewById(R.id.image);
@@ -166,10 +171,21 @@ public class FinalImageActivity extends AppCompatActivity {
 
         view2.setVisibility(View.INVISIBLE);
         view1.setVisibility(View.INVISIBLE);
+        shareButton.setClickable(false);
+        saveButton.setClickable(false);
+        deleteButton.setClickable(false);
+        view1.setClickable(false);
+        view2.setClickable(false);
 
     }
 
     void setOnClickListerners(){
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,13 +204,24 @@ public class FinalImageActivity extends AppCompatActivity {
         relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isInVisible) {
-                    isInVisible = false;
-                    transitionOutFullScreen();
-                }
-                else if(!isInVisible){
-                    isInVisible = true;
-                    transitionIntoFullScreen();
+                if (!isLoading) {
+                    if (isInVisible) {
+                        isInVisible = false;
+                        transitionOutFullScreen();
+                        shareButton.setClickable(true);
+                        saveButton.setClickable(true);
+                        deleteButton.setClickable(true);
+                        view1.setClickable(true);
+                        view2.setClickable(true);
+                    } else if (!isInVisible) {
+                        isInVisible = true;
+                        transitionIntoFullScreen();
+                        shareButton.setClickable(false);
+                        saveButton.setClickable(false);
+                        deleteButton.setClickable(false);
+                        view1.setClickable(false);
+                        view2.setClickable(false);
+                    }
                 }
             }
 
@@ -332,8 +359,19 @@ public class FinalImageActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(final Bitmap[] result) {
-
+            layoutTop.setVisibility(View.VISIBLE);
+            layoutBottom.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
+            transitionOutFullScreen();
+
+            isInVisible=false;
+            isLoading=false;
+            //make the buttons clickable
+            shareButton.setClickable(true);
+            saveButton.setClickable(true);
+            deleteButton.setClickable(true);
+            view1.setClickable(true);
+            view2.setClickable(true);
 
             view2.setVisibility(View.VISIBLE);
             SaveImage(result[0]);
@@ -420,7 +458,7 @@ public class FinalImageActivity extends AppCompatActivity {
         eyes_pos[1][0]=(eyes_pos[1][0]*resizedFaceBitmap.getWidth())/croppedBitmap.getWidth();
         eyes_pos[0][1]=(eyes_pos[0][1]*resizedFaceBitmap.getHeight())/croppedBitmap.getHeight();
         eyes_pos[1][1]=(eyes_pos[1][1]*resizedFaceBitmap.getHeight()) / croppedBitmap.getHeight();
-        Log.v(LOG_TAG,"X: "+eyes_pos[0][0] + "to" + eyes_pos[1][0]);
+        Log.v(LOG_TAG, "X: " + eyes_pos[0][0] + "to" + eyes_pos[1][0]);
         Log.v(LOG_TAG, "Y: " + eyes_pos[0][1] + "to" + eyes_pos[1][1]);
     }
 
@@ -478,9 +516,9 @@ public class FinalImageActivity extends AppCompatActivity {
 
     private void transitionOutFullScreen(){
 
-        AlphaAnimation animation = new AlphaAnimation(1.0f, 0.0f);
+        AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
         animation.setFillAfter(true);
-        animation.setDuration(750);
+        animation.setDuration(650);
 
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);
@@ -490,9 +528,9 @@ public class FinalImageActivity extends AppCompatActivity {
 
     private void transitionIntoFullScreen(){
 
-        AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
+        AlphaAnimation animation = new AlphaAnimation(1.0f, 0.0f);
         animation.setFillAfter(true);
-        animation.setDuration(750);
+        animation.setDuration(650);
 
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);
