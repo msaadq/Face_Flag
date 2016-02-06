@@ -57,6 +57,8 @@ public class FinalImageActivity extends AppCompatActivity {
     Double eulerY;
     Double eulerZ;
     String flagTitle;
+    Bitmap normalFlag;
+    Bitmap bigFlag;
     Bitmap resizedFaceBitmap;
     Bitmap croppedBitmap;
     Bitmap face;
@@ -71,6 +73,12 @@ public class FinalImageActivity extends AppCompatActivity {
     String mCurrentPhotoPath;
     File image;
     boolean isLoading;
+
+    private int DEFAULT_POSITION_FLAG_CHEEKS=0;
+    private int DEFAULT_POSITION_INFOGRAPHIC=1;
+    private int DEFAULT_POSTION_FULL_FLAG_FILTER=2;
+
+    int currentPosition;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -90,26 +98,38 @@ public class FinalImageActivity extends AppCompatActivity {
         int imageIdLeft = R.raw.bean_right;
         int imageIdRight = R.raw.bean_left;
         int imageIdBackground=R.raw.team_bean;
+        int bigFalgImageId=R.raw.image02;
+        int normalFlagId=R.raw.image02;
         if(flagTitle.equals("PESHAWAR ZALMI")){
             imageIdLeft = R.raw.peshawar_left;
             imageIdRight=R.raw.peshawar_right;
             imageIdBackground=R.raw.team_peshwar;
+            bigFalgImageId=R.raw.peshawar_zalmi;
+            normalFlagId=R.raw.image_4;
         }else if(flagTitle.equals("ISLAMABAD UNITED")){
             imageIdLeft = R.raw.islamabad_left;
             imageIdRight=R.raw.islamabad_right;
             imageIdBackground=R.raw.team_islamabad;
+            bigFalgImageId=R.raw.islamabad_united;
+            normalFlagId=R.raw.image_1;
         }else if(flagTitle.equals("KARACHI KINGS")){
             imageIdLeft = R.raw.karachi_left;
             imageIdRight=R.raw.karachi_right;
             imageIdBackground=R.raw.team_karachi;
+            bigFalgImageId=R.raw.karachi_kings;
+            normalFlagId=R.raw.image_2;
         }else if(flagTitle.equals("LAHORE QALANDERS")){
             imageIdLeft = R.raw.lahore_left;
             imageIdRight=R.raw.lahore_right;
             imageIdBackground=R.raw.team_lahore;
+            bigFalgImageId=R.raw.lahore_qalandars;
+            normalFlagId=R.raw.image_3;
         }else if(flagTitle.equals("QUETTA GLADIATORS")){
             imageIdLeft = R.raw.quetta_left;
             imageIdRight=R.raw.quetta_right;
             imageIdBackground=R.raw.team_quetta;
+            bigFalgImageId=R.raw.quetta_gladiators;
+            normalFlagId=R.raw.image_5;
         }
 
         InputStream streamLeft = getResources().openRawResource(imageIdLeft);
@@ -121,6 +141,11 @@ public class FinalImageActivity extends AppCompatActivity {
         InputStream streamBackground = getResources().openRawResource(imageIdBackground);
         backgroundImage = BitmapFactory.decodeStream(streamBackground);
 
+        InputStream streamBigFlag = getResources().openRawResource(bigFalgImageId);
+        bigFlag = BitmapFactory.decodeStream(streamBigFlag);
+
+        InputStream streamNormalFlag = getResources().openRawResource(normalFlagId);
+        normalFlag = BitmapFactory.decodeStream(streamNormalFlag);
         try {
             face= MediaStore.Images.Media.getBitmap(this.getContentResolver(),
                     Uri.parse(selectedImage));
@@ -306,7 +331,7 @@ public class FinalImageActivity extends AppCompatActivity {
             }
 
             if (success) {
-                Toast.makeText(getApplicationContext(), "Image saved with success",
+                Toast.makeText(getApplicationContext(), "Image saved with success. Image was Saved In the \"Pictures\" directory.",
                         Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getApplicationContext(),
@@ -334,7 +359,7 @@ public class FinalImageActivity extends AppCompatActivity {
         //sendIntent.putExtra(Intent.EXTRA_STREAM,file.getPath());
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
           sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting " + flagTitle + "! Get " +
-                "your team's flag here: http://playstore.android.com/FaceFlag");
+                  "your team's flag here: http://playstore.android.com/FaceFlag");
         sendIntent.setType("image/jpeg");
         startActivity(Intent.createChooser(sendIntent, "share"));
     }
@@ -380,8 +405,20 @@ public class FinalImageActivity extends AppCompatActivity {
                 eulerZ=0.0;
             }
             croppingMetrics=faceCharacteristics.getCroppingMetrics();
-            CheekFlagOverlay cheekFlagOverlay = new CheekFlagOverlay(backgroundImage,face,flagLeft,flagRight,cheeks_pos[0],
-                    cheeks_pos[1],nose_pos,eyes_pos[0],eyes_pos[1],eulerY,eulerZ,croppingMetrics);
+            CheekFlagOverlay cheekFlagOverlay = new CheekFlagOverlay(
+                    normalFlag,
+                    bigFlag,
+                    backgroundImage,
+                    face,flagLeft,
+                    flagRight,
+                    cheeks_pos[0],
+                    cheeks_pos[1],
+                    nose_pos,eyes_pos[0],
+                    eyes_pos[1],
+                    eulerY,
+                    eulerZ,
+                    croppingMetrics
+            );
 
             detector.release();
             return cheekFlagOverlay.overlayFlag();
@@ -398,6 +435,7 @@ public class FinalImageActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(final Bitmap[] result) {
+            currentPosition=DEFAULT_POSITION_FLAG_CHEEKS;
             layoutTop.setVisibility(View.VISIBLE);
             layoutBottom.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
@@ -414,30 +452,47 @@ public class FinalImageActivity extends AppCompatActivity {
             backButton.setClickable(true);
             backButton.setVisibility(View.VISIBLE);
             view2.setVisibility(View.VISIBLE);
-            SaveImage(result[0]);
-            imageView.setImageBitmap(result[0]);
+            SaveImage(result[currentPosition]);
+            imageView.setImageBitmap(result[currentPosition]);
 
             view1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SaveImage(result[0]);
-                    imageView.setImageBitmap(result[0]);
-                    fadeOutImageButton(view1);
-                    view1.setVisibility(View.INVISIBLE);
-                    fadeInImageButton(view2);
-                    view2.setVisibility(View.VISIBLE);
+                    if(currentPosition==DEFAULT_POSTION_FULL_FLAG_FILTER)
+                    {
+                        SaveImage(result[DEFAULT_POSITION_INFOGRAPHIC]);
+                        imageView.setImageBitmap(result[DEFAULT_POSITION_INFOGRAPHIC]);
+                        fadeInImageButton(view2);
+                        view2.setVisibility(View.VISIBLE);
+                        currentPosition=DEFAULT_POSITION_INFOGRAPHIC;
+                    }else if(currentPosition==DEFAULT_POSITION_INFOGRAPHIC){
+                        SaveImage(result[DEFAULT_POSITION_FLAG_CHEEKS]);
+                        imageView.setImageBitmap(result[DEFAULT_POSITION_FLAG_CHEEKS]);
+                        fadeOutImageButton(view1);
+                        view1.setVisibility(View.INVISIBLE);
+                        currentPosition=DEFAULT_POSITION_FLAG_CHEEKS;
+                    }
+
                 }
             });
 
             view2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SaveImage(result[1]);
-                    imageView.setImageBitmap(result[1]);
-                    fadeOutImageButton(view2);
-                    view2.setVisibility(View.INVISIBLE);
-                    fadeInImageButton(view1);
-                    view1.setVisibility(View.VISIBLE);
+                    if(currentPosition==DEFAULT_POSITION_FLAG_CHEEKS)
+                    {
+                        SaveImage(result[DEFAULT_POSITION_INFOGRAPHIC]);
+                        imageView.setImageBitmap(result[DEFAULT_POSITION_INFOGRAPHIC]);
+                        fadeInImageButton(view1);
+                        view1.setVisibility(View.VISIBLE);
+                        currentPosition=DEFAULT_POSITION_INFOGRAPHIC;
+                    }else if(currentPosition==DEFAULT_POSITION_INFOGRAPHIC){
+                        SaveImage(result[DEFAULT_POSTION_FULL_FLAG_FILTER]);
+                        imageView.setImageBitmap(result[DEFAULT_POSTION_FULL_FLAG_FILTER]);
+                        fadeOutImageButton(view2);
+                        view2.setVisibility(View.INVISIBLE);
+                        currentPosition=DEFAULT_POSTION_FULL_FLAG_FILTER;
+                    }
                 }
             });
 
@@ -527,7 +582,7 @@ public class FinalImageActivity extends AppCompatActivity {
 
         AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
         animation.setFillAfter(true);
-        animation.setDuration(650);
+        animation.setDuration(250);
 
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);
@@ -540,7 +595,7 @@ public class FinalImageActivity extends AppCompatActivity {
 
         AlphaAnimation animation = new AlphaAnimation(1.0f, 0.0f);
         animation.setFillAfter(true);
-        animation.setDuration(650);
+        animation.setDuration(250);
 
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);

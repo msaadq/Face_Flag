@@ -19,6 +19,8 @@ public class CheekFlagOverlay {
     private int DEFAULT_FACE_POSITION_IN_BACKGROUND_Y=350;
     private int DEFAULT_FACE_RADIUS_IN_BACKGROUND=125;
 
+    private Bitmap normalFlag;
+    private Bitmap bigflag;
     private Bitmap backgroundImage;
     private Bitmap originalImage;
     private Bitmap flagImageLeft;
@@ -34,9 +36,11 @@ public class CheekFlagOverlay {
     private double eulerY;
     private double eulerZ;
 
-    CheekFlagOverlay(Bitmap backgroundImage, Bitmap originalImage, Bitmap flagImageLeft,Bitmap flagImageRight, int[] cheeksLeftPos, int[] cheeksRightPos,
+    CheekFlagOverlay(Bitmap normalFlag,Bitmap bigFlag, Bitmap backgroundImage, Bitmap originalImage, Bitmap flagImageLeft,Bitmap flagImageRight, int[] cheeksLeftPos, int[] cheeksRightPos,
                      int[] nosePos,int[] eyesLeftPos, int[] eyesRightPos,Double eulerY,Double eulerZ,int[] croppingMetrics){
 
+        this.normalFlag=normalFlag;
+        this.bigflag=bigFlag;
         this.backgroundImage=backgroundImage;
         this.originalImage = originalImage;
         this.flagImageLeft=flagImageLeft;
@@ -136,7 +140,7 @@ public class CheekFlagOverlay {
                 transparentBitmap.setPixel(i,j,rightFlag.getPixel(i - xLeft2, j - yTop2));
             }
         }
-        Bitmap faceWithFlagsOnCheeks=overlay(originalImage, transparentBitmap);
+        Bitmap faceWithFlagsOnCheeks=overlay(originalImage, transparentBitmap,140,0,0);
         Bitmap croppedBitmap = Bitmap.createBitmap(originalImage, croppingMetrics[0],
                 croppingMetrics[1] , croppingMetrics[2] , croppingMetrics[3] );
         Log.v("Cropped width,hieght",croppedBitmap.getWidth()+" "+croppedBitmap.getHeight());
@@ -144,8 +148,8 @@ public class CheekFlagOverlay {
         if((faceWithFlagsOnCheeks.getWidth()-croppingExtention)>croppedBitmap.getWidth()&&
                 ((faceWithFlagsOnCheeks.getHeight()-croppingExtention)>croppedBitmap.getHeight())
                 &&croppingMetrics[0]>croppingExtention&&croppingMetrics[1]>croppingExtention){
-            croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0]-croppingExtention/2,
-                    croppingMetrics[1]-croppingExtention/2, croppingMetrics[2] + croppingExtention, croppingMetrics[3] + croppingExtention);
+            croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0] - croppingExtention / 2,
+                    croppingMetrics[1] - croppingExtention / 2, croppingMetrics[2] + croppingExtention, croppingMetrics[3] + croppingExtention);
         }else{
             croppedBitmap=originalImage;
         }
@@ -181,7 +185,115 @@ public class CheekFlagOverlay {
                 }
             }
         }
-        return new Bitmap[]{faceWithFlagsOnCheeks,transparentBitmap2};
+        Bitmap flagFilterToApplyOnOriginalImage;
+        Bitmap fullFlagFilterOnImage;
+     /*   if(!(originalImage.getHeight()>originalImage.getWidth())) {
+            if (originalImage.getWidth() < bigflag.getWidth() && originalImage.getHeight() < bigflag.getHeight()) {
+                int centreFlagX = bigflag.getWidth() / 2;
+                int centreFlagY = bigflag.getHeight() / 2;
+                int fullFlagStartLeft = (int) (centreFlagX - ((double) originalImage.getWidth() / (double) 2));
+                int fullFlagStartTop = (int) (centreFlagY - ((double) originalImage.getHeight() / (double) 2));
+                flagFilterToApplyOnOriginalImage = Bitmap.createBitmap(bigflag, fullFlagStartLeft,
+                        fullFlagStartTop, originalImage.getWidth(), originalImage.getHeight());
+            } else {
+                //TODO: resize the flag
+                if (originalImage.getWidth() > bigflag.getWidth() && !(originalImage.getHeight() > bigflag.getHeight())) {
+                    flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag, originalImage.getWidth(),
+                            (int) (originalImage.getWidth() * ((double) bigflag.getHeight() / (double) bigflag.getWidth()) + 1),
+                            false);
+                } else if (!(originalImage.getWidth() > bigflag.getWidth()) && (originalImage.getHeight() > bigflag.getHeight())) {
+                    flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag,
+                            (int) (originalImage.getHeight() * ((double) bigflag.getWidth() / (double) bigflag.getHeight()) + 1),
+                            originalImage.getHeight(),
+                            false);
+                } else if (originalImage.getHeight() > bigflag.getHeight() && originalImage.getWidth() > bigflag.getWidth()) {
+                    if (bigflag.getWidth() > bigflag.getHeight()) {
+                        flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag,
+                                (int) (originalImage.getHeight() * ((double) bigflag.getWidth() / (double) bigflag.getHeight()) + 1),
+                                originalImage.getHeight(),
+                                false);
+                    } else if (bigflag.getHeight() > bigflag.getWidth()) {
+                        flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag, originalImage.getWidth(),
+                                (int) (originalImage.getWidth() * ((double) bigflag.getHeight() / (double) bigflag.getWidth()) + 1),
+                                false);
+                    } else {
+                        if (originalImage.getHeight() > originalImage.getWidth()) {
+                            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag,
+                                    (int) (originalImage.getHeight() * ((double) bigflag.getWidth() / (double) bigflag.getHeight()) + 1),
+                                    originalImage.getHeight(),
+                                    false);
+                        } else if (originalImage.getWidth() > originalImage.getHeight()) {
+                            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag, originalImage.getWidth(),
+                                    (int) (originalImage.getWidth() * ((double) bigflag.getHeight() / (double) bigflag.getWidth()) + 1),
+                                    false);
+                        } else {
+                            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag,
+                                    originalImage.getWidth(), originalImage.getHeight(), false);
+                        }
+                    }
+                } else {
+                    flagFilterToApplyOnOriginalImage = bigflag;
+                }
+
+                int centreFlagX = flagFilterToApplyOnOriginalImage.getWidth() / 2;
+                int centreFlagY = flagFilterToApplyOnOriginalImage.getHeight() / 2;
+                int fullFlagStartLeft = (int) (centreFlagX - ((double) originalImage.getWidth() / (double) 2));
+                int fullFlagStartTop = (int) (centreFlagY - ((double) originalImage.getHeight() / (double) 2));
+                flagFilterToApplyOnOriginalImage = Bitmap.createBitmap(flagFilterToApplyOnOriginalImage, fullFlagStartLeft,
+                        fullFlagStartTop, originalImage.getWidth(), originalImage.getHeight());
+            }
+            fullFlagFilterOnImage=overlay(originalImage,flagFilterToApplyOnOriginalImage,50,0);*/
+        if(originalImage.getHeight()>originalImage.getWidth()){
+            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag, originalImage.getWidth(),
+                        (int) (originalImage.getWidth() * ((double) bigflag.getHeight() / (double) bigflag.getWidth()) + 1),
+                        false);
+
+            Bitmap transparentBitmapOfOrignalSize=getTransparentBitmap(originalImage.getWidth(),originalImage.getHeight());
+
+            for(int i=0;i<transparentBitmapOfOrignalSize.getWidth();i++){
+                for(int j=0;j<transparentBitmapOfOrignalSize.getHeight();j++){
+                        transparentBitmapOfOrignalSize.setPixel(i, j, flagFilterToApplyOnOriginalImage.getPixel(i, 3));
+                }
+            }
+            fullFlagFilterOnImage=overlay(originalImage,transparentBitmapOfOrignalSize,150,0,0);
+        }else if(originalImage.getHeight()<originalImage.getWidth()){
+            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag,
+                    (int) (originalImage.getHeight() * ((double) bigflag.getWidth() / (double) bigflag.getHeight()) + 1),
+                    originalImage.getHeight(),
+                    false);
+
+            Bitmap transparentBitmapOfOrignalSize=getTransparentBitmap(originalImage.getWidth(),originalImage.getHeight());
+
+            for(int i=0;i<transparentBitmapOfOrignalSize.getWidth();i++){
+                for(int j=0;j<transparentBitmapOfOrignalSize.getHeight();j++){
+                    transparentBitmapOfOrignalSize.setPixel(i, j, flagFilterToApplyOnOriginalImage.getPixel(3, j));
+                }
+            }
+            fullFlagFilterOnImage=overlay(originalImage,transparentBitmapOfOrignalSize,150,0,0);
+
+        }else{
+            flagFilterToApplyOnOriginalImage = bigflag.createScaledBitmap(bigflag, originalImage.getWidth(),
+                    (int) (originalImage.getWidth() * ((double) bigflag.getHeight() / (double) bigflag.getWidth()) + 1),
+                    false);
+
+            Bitmap transparentBitmapOfOrignalSize=getTransparentBitmap(originalImage.getWidth(),originalImage.getHeight());
+
+            for(int i=0;i<transparentBitmapOfOrignalSize.getWidth();i++){
+                for(int j=0;j<transparentBitmapOfOrignalSize.getHeight();j++){
+                    transparentBitmapOfOrignalSize.setPixel(i, j, flagFilterToApplyOnOriginalImage.getPixel(i, 3));
+                }
+            }
+            fullFlagFilterOnImage=overlay(originalImage,transparentBitmapOfOrignalSize,150,0,0);
+        }
+        int normalFlagWidth= (int) ((double)originalImage.getWidth()/(double)2.2);
+        int normalFlagHieght=normalFlagWidth;
+        Bitmap resizedNormalFlag=normalFlag.createScaledBitmap(normalFlag, normalFlagWidth, normalFlagHieght, false);
+
+        fullFlagFilterOnImage=overlay(fullFlagFilterOnImage,resizedNormalFlag,255,
+                fullFlagFilterOnImage.getWidth()-normalFlagWidth,
+                fullFlagFilterOnImage.getHeight()-normalFlagHieght
+        );
+        return new Bitmap[]{faceWithFlagsOnCheeks,transparentBitmap2,fullFlagFilterOnImage};
     }
 
     private Bitmap getTransparentBitmap(int xRes,int yRes){
@@ -193,13 +305,15 @@ public class CheekFlagOverlay {
         return  bmOverlay;
     }
 
-    private Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
+    private Bitmap overlay(Bitmap bmp1, Bitmap bmp2,int alpha,float translateX,float translateY) {
         Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
         Paint paint = new Paint();
-        paint.setAlpha(150);
+        paint.setAlpha(alpha);
+        Matrix matrix=new Matrix();
+        matrix.preTranslate(translateX,translateY);
         canvas.drawBitmap(bmp1, new Matrix(), null);
-        canvas.drawBitmap(bmp2, new Matrix(), paint);
+        canvas.drawBitmap(bmp2, matrix, paint);
         return bmOverlay;
     }
 
