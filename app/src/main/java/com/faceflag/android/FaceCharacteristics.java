@@ -1,9 +1,6 @@
 package com.faceflag.android;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.Log;
 import android.util.SparseArray;
 

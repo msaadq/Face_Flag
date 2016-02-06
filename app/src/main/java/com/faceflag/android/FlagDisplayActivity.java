@@ -161,7 +161,7 @@ public class FlagDisplayActivity extends AppCompatActivity {
 
         String titles[] = {getString(R.string.title_islamabad),getString(R.string.title_karachi),
                 getString(R.string.title_lahor), getString(R.string.title_peshawar),
-                getString(R.string.title_quetta)};
+                getString(R.string.title_quetta),getString(R.string.default_)};
 
         for (int i = 0; i < imgs.length(); i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgs.getResourceId(i, -1));
