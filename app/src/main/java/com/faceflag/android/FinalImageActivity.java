@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 public class FinalImageActivity extends AppCompatActivity {
@@ -75,6 +77,8 @@ public class FinalImageActivity extends AppCompatActivity {
     LinearLayout layoutTop;
     LinearLayout layoutBottom;
     RelativeLayout relativeLayout;
+    String mCurrentPhotoPath;
+    File image;
     boolean isLoading;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -116,7 +120,7 @@ public class FinalImageActivity extends AppCompatActivity {
             imageIdRight=R.raw.quetta_right;
             imageIdBackground=R.raw.team_quetta;
         }
-        
+
         InputStream streamLeft = getResources().openRawResource(imageIdLeft);
         flagLeft = BitmapFactory.decodeStream(streamLeft);
 
@@ -168,7 +172,7 @@ public class FinalImageActivity extends AppCompatActivity {
         saveButton=(ImageButton) findViewById(R.id.save_button);
         view1 = (ImageButton) findViewById(R.id.view_1);
         view2 = (ImageButton) findViewById(R.id.view_2);
-
+        backButton.setVisibility(View.INVISIBLE);
         view2.setVisibility(View.INVISIBLE);
         view1.setVisibility(View.INVISIBLE);
         shareButton.setClickable(false);
@@ -176,6 +180,7 @@ public class FinalImageActivity extends AppCompatActivity {
         deleteButton.setClickable(false);
         view1.setClickable(false);
         view2.setClickable(false);
+        backButton.setClickable(false);
 
     }
 
@@ -213,6 +218,7 @@ public class FinalImageActivity extends AppCompatActivity {
                         deleteButton.setClickable(true);
                         view1.setClickable(true);
                         view2.setClickable(true);
+                        backButton.setClickable(true);
                     } else if (!isInVisible) {
                         isInVisible = true;
                         transitionIntoFullScreen();
@@ -221,6 +227,7 @@ public class FinalImageActivity extends AppCompatActivity {
                         deleteButton.setClickable(false);
                         view1.setClickable(false);
                         view2.setClickable(false);
+                        backButton.setClickable(false);
                     }
                 }
             }
@@ -235,12 +242,44 @@ public class FinalImageActivity extends AppCompatActivity {
         });
     }
 
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS);
+
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+    }
+
     private void saveImage() {
+
         BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
 
-        File sdCardDirectory = Environment.getExternalStorageDirectory();
-        File image = new File(sdCardDirectory, "FaceFlag.png");
+        try {
+            image = createImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         boolean success = false;
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -259,16 +298,20 @@ public class FinalImageActivity extends AppCompatActivity {
             try {
 
                 outStream = new FileOutputStream(image);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                 /* 100 to keep full quality of the image */
-
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                String imageFileName = "JPEG_" + timeStamp + "_";
+                MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, imageFileName , " ");
                 outStream.flush();
                 outStream.close();
                 success = true;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+                Log.v(LOG_TAG,e.toString());
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.v(LOG_TAG, e.toString());
             }
 
             if (success) {
@@ -280,6 +323,8 @@ public class FinalImageActivity extends AppCompatActivity {
             }
 
         }
+
+
     }
 
     private void shareImage() {
@@ -293,12 +338,14 @@ public class FinalImageActivity extends AppCompatActivity {
 
 
         Intent sendIntent = new Intent();
+
         sendIntent.setAction(Intent.ACTION_SEND);
         Uri uri = Uri.parse(file.getPath());
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting" + flagTitle + "! Get " +
-                "your team's flag here: http://playstore.android.com/FaceFlag");
+      //  sendIntent.putExtra(Intent.EXTRA_TEXT, "I am supporting" + flagTitle + "! Get " +
+        //        "your team's flag here: http://playstore.android.com/FaceFlag");
         sendIntent.setType("image/*");
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "http://www.google.fr/");
         startActivity(Intent.createChooser(sendIntent, "share"));
     }
 
@@ -372,7 +419,8 @@ public class FinalImageActivity extends AppCompatActivity {
             deleteButton.setClickable(true);
             view1.setClickable(true);
             view2.setClickable(true);
-
+            backButton.setClickable(true);
+            backButton.setVisibility(View.VISIBLE);
             view2.setVisibility(View.VISIBLE);
             SaveImage(result[0]);
             imageView.setImageBitmap(result[0]);
@@ -523,6 +571,7 @@ public class FinalImageActivity extends AppCompatActivity {
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);
         layoutBottom.startAnimation(animation);
+        backButton.startAnimation(animation);
     }
 
 
@@ -535,6 +584,7 @@ public class FinalImageActivity extends AppCompatActivity {
         //apply the animation ( fade In ) to your LAyout
         layoutTop.startAnimation(animation);
         layoutBottom.startAnimation(animation);
+        backButton.startAnimation(animation);
     }
 
     private void fadeOutImageButton(ImageButton button) {
