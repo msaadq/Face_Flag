@@ -1,6 +1,17 @@
 <resources>
-    <string name="app_name">FaceDetectionDemo</string>
+    <string name="app_name">Face Flag</string>
+    <string name="title_islamabad">ISLAMABAD UNITED</string>
+    <string name="title_karachi">KARACHI KINGS</string>
+    <string name="title_lahor">LAHORE QALANDERS</string>
+    <string name="title_peshawar">PESHAWAR ZALMI</string>
+    <string name="title_quetta">QUETTA GLADIATORS</string>
+    <string-array name="image_ids">
+        <item>@drawable/image_1</item>
+        <item>@drawable/image_2</item>
+        <item>@drawable/image_3</item>
+        <item>@drawable/image_4</item>
+        <item>@drawable/image_5</item>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    </string-array>
+
 </resources>
