@@ -1,18 +1,11 @@
 package com.faceflag.android;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.animation.AlphaAnimation;
-import android.widget.LinearLayout;
 
-import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.face.Face;
-import com.google.android.gms.vision.face.FaceDetector;
 
 /**
  * Created by usmankhan on 2/5/2016.
@@ -88,10 +81,6 @@ public class CheekFlagOverlay {
         return Bitmap.createBitmap(flagImage, 0, 0, flagImage.getWidth(),flagImage.getHeight(),
                 matrix,false);
     }
-
-
-
-
 
     public int[] getRequiredFlagSize(Bitmap flagImage){
 
