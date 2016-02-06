@@ -18,7 +18,7 @@ public class CheekFlagOverlay {
 
     private int CHEEK_OFFSET_RIGHT;
     private int CHEEK_OFFSET_LEFT;
-    private double DEFAULT_CHEECK_OFFSET_RANGE=7.0;
+    private double DEFAULT_CHEECK_OFFSET_RANGE=5.0;
     private int DEFAULT_FACE_POSITION_IN_BACKGROUND_X=250;
     private int DEFAULT_FACE_POSITION_IN_BACKGROUND_Y=350;
     private int DEFAULT_FACE_RADIUS_IN_BACKGROUND=125;
@@ -146,15 +146,26 @@ public class CheekFlagOverlay {
         Bitmap croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0],
                 croppingMetrics[1] , croppingMetrics[2] , croppingMetrics[3] );
         Log.v("Cropped width,hieght",croppedBitmap.getWidth()+" "+croppedBitmap.getHeight());
-        int croppingExtention= (int) ((double)(croppedBitmap.getWidth()*300)/(double)581);
+        int croppingExtention= (int) ((double)(croppedBitmap.getWidth()*300)/(double)560);
         if((faceWithFlagsOnCheeks.getWidth()-croppingExtention)>croppedBitmap.getWidth()&&
-                ((faceWithFlagsOnCheeks.getHeight()-croppingExtention)>croppedBitmap.getHeight())){
+                ((faceWithFlagsOnCheeks.getHeight()-croppingExtention)>croppedBitmap.getHeight())
+                &&croppingMetrics[0]>croppingExtention&&croppingMetrics[1]>croppingExtention){
             croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0]-croppingExtention/2,
                     croppingMetrics[1]-croppingExtention/2, croppingMetrics[2] + croppingExtention, croppingMetrics[3] + croppingExtention);
+        }else{
+            croppedBitmap=faceWithFlagsOnCheeks;
         }
-        Bitmap resizedFaceWithFlag = flagImageLeft.createScaledBitmap(croppedBitmap, DEFAULT_FACE_RADIUS_IN_BACKGROUND * 2,
-                (int) (DEFAULT_FACE_RADIUS_IN_BACKGROUND * 2 * (double) ((double) croppedBitmap.getHeight() / (double) croppedBitmap.getWidth())),
-                false);
+        Bitmap resizedFaceWithFlag=croppedBitmap;
+        if(croppedBitmap.getWidth()>croppedBitmap.getHeight()) {
+            resizedFaceWithFlag = flagImageLeft.createScaledBitmap(croppedBitmap, (int) (DEFAULT_FACE_RADIUS_IN_BACKGROUND *
+                                        2*((double)croppedBitmap.getWidth()/(double)croppedBitmap.getHeight())),
+                    DEFAULT_FACE_RADIUS_IN_BACKGROUND * 2,
+                    false);
+        }else {
+            resizedFaceWithFlag = flagImageLeft.createScaledBitmap(croppedBitmap, DEFAULT_FACE_RADIUS_IN_BACKGROUND * 2,
+                    (int) (DEFAULT_FACE_RADIUS_IN_BACKGROUND * 2 * (double) ((double) croppedBitmap.getHeight() / (double) croppedBitmap.getWidth())),
+                    false);
+        }
 
         int widthOfFaceWithFlags=resizedFaceWithFlag.getWidth();
         int heightOfFaceWithFlags=resizedFaceWithFlag.getHeight();
