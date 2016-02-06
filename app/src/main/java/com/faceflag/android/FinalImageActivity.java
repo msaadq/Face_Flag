@@ -1,16 +1,20 @@
 package com.faceflag.android;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +23,13 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
@@ -43,6 +52,10 @@ public class FinalImageActivity extends AppCompatActivity {
     ImageButton deleteButton;
     ImageButton shareButton;
     ImageButton saveButton;
+    ImageButton view1;
+    ImageButton view2;
+    ProgressBar progressBar;
+    Boolean isInVisible;
     int cheeks_pos[][];
     int eyes_pos[][];
     int nose_pos[];
@@ -51,7 +64,6 @@ public class FinalImageActivity extends AppCompatActivity {
     Double eulerZ;
     String flagTitle;
     Bitmap resizedFaceBitmap;
-    Bitmap resizedFlagBitmap;
     Bitmap croppedBitmap;
     Bitmap face;
     Bitmap transparent;
@@ -59,6 +71,9 @@ public class FinalImageActivity extends AppCompatActivity {
     Bitmap flagRight;
     Bitmap backgroundImage;
     FaceCharacteristics faceCharacteristics;
+    LinearLayout layoutTop;
+    LinearLayout layoutBottom;
+    RelativeLayout relativeLayout;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -129,10 +144,29 @@ public class FinalImageActivity extends AppCompatActivity {
     }
 
     void bindViews(){
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#2569c9"),
+                PorterDuff.Mode.MULTIPLY);
+        progressBar.setVisibility(View.VISIBLE);
+
+        layoutTop = (LinearLayout) findViewById(R.id.layout_top);
+        layoutBottom = (LinearLayout) findViewById(R.id.layout_bottom);
+        layoutTop.setVisibility(View.VISIBLE);
+        layoutBottom.setVisibility(View.VISIBLE);
+        isInVisible=false;
+
+        relativeLayout = (RelativeLayout) findViewById(R.id.main_relative_layout);
         imageView=(ImageView) findViewById(R.id.image);
         deleteButton=(ImageButton) findViewById(R.id.delete_button);
         shareButton=(ImageButton) findViewById(R.id.share_button);
         saveButton=(ImageButton) findViewById(R.id.save_button);
+        view1 = (ImageButton) findViewById(R.id.view_1);
+        view2 = (ImageButton) findViewById(R.id.view_2);
+
+        view2.setVisibility(View.INVISIBLE);
+        view1.setVisibility(View.INVISIBLE);
+
     }
 
     void setOnClickListerners(){
@@ -148,6 +182,22 @@ public class FinalImageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 shareImage();
             }
+        });
+
+
+        relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isInVisible) {
+                    isInVisible = false;
+                    transitionOutFullScreen();
+                }
+                else if(!isInVisible){
+                    isInVisible = true;
+                    transitionIntoFullScreen();
+                }
+            }
+
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -281,9 +331,39 @@ public class FinalImageActivity extends AppCompatActivity {
         protected void onProgressUpdate(Integer... progress) {
         }
 
-        protected void onPostExecute(Bitmap[] result) {
-            SaveImage(result[1]);
-            imageView.setImageBitmap(result[1]);
+        protected void onPostExecute(final Bitmap[] result) {
+
+            progressBar.setVisibility(View.INVISIBLE);
+
+            view2.setVisibility(View.VISIBLE);
+            SaveImage(result[0]);
+            imageView.setImageBitmap(result[0]);
+
+            view1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SaveImage(result[0]);
+                    imageView.setImageBitmap(result[0]);
+                    fadeOutImageButton(view1);
+                    view1.setVisibility(View.INVISIBLE);
+                    fadeInImageButton(view2);
+                    view2.setVisibility(View.VISIBLE);
+                }
+            });
+
+            view2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SaveImage(result[1]);
+                    imageView.setImageBitmap(result[1]);
+                    fadeOutImageButton(view2);
+                    view2.setVisibility(View.INVISIBLE);
+                    fadeInImageButton(view1);
+                    view1.setVisibility(View.VISIBLE);
+                }
+            });
+
+
         }
     }
 
@@ -313,8 +393,8 @@ public class FinalImageActivity extends AppCompatActivity {
 
         // Get face features
         cheeks_pos = faceCharacteristics.getCheeks_pos();
-        Log.v(LOG_TAG,"Cheeks X: "+cheeks_pos[0][0]+"to"+cheeks_pos[1][0]);
-        Log.v(LOG_TAG,"Cheeks Y: "+cheeks_pos[0][1]+"to"+cheeks_pos[1][1]);
+        Log.v(LOG_TAG, "Cheeks X: " + cheeks_pos[0][0] + "to" + cheeks_pos[1][0]);
+        Log.v(LOG_TAG, "Cheeks Y: " + cheeks_pos[0][1] + "to" + cheeks_pos[1][1]);
 
         eyes_pos = faceCharacteristics.getEyes_pos();
 
@@ -395,5 +475,52 @@ public class FinalImageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void transitionOutFullScreen(){
+
+        AlphaAnimation animation = new AlphaAnimation(1.0f, 0.0f);
+        animation.setFillAfter(true);
+        animation.setDuration(750);
+
+        //apply the animation ( fade In ) to your LAyout
+        layoutTop.startAnimation(animation);
+        layoutBottom.startAnimation(animation);
+    }
+
+
+    private void transitionIntoFullScreen(){
+
+        AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
+        animation.setFillAfter(true);
+        animation.setDuration(750);
+
+        //apply the animation ( fade In ) to your LAyout
+        layoutTop.startAnimation(animation);
+        layoutBottom.startAnimation(animation);
+    }
+
+    private void fadeOutImageButton(ImageButton button) {
+
+        AlphaAnimation animation = new AlphaAnimation(1.0f, 0.0f);
+        animation.setFillAfter(true);
+        animation.setDuration(250);
+
+        //apply the animation ( fade In ) to your LAyout
+        button.startAnimation(animation);
+    }
+
+    private void fadeInImageButton(ImageButton button) {
+
+        AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
+        animation.setFillAfter(true);
+        animation.setDuration(250);
+
+        //apply the animation ( fade In ) to your LAyout
+        button.startAnimation(animation);
+    }
+
+
+
+
 
 }

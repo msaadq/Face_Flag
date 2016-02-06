@@ -1,11 +1,14 @@
 package com.faceflag.android;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.animation.AlphaAnimation;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -18,7 +21,7 @@ public class CheekFlagOverlay {
 
     private int CHEEK_OFFSET_RIGHT;
     private int CHEEK_OFFSET_LEFT;
-    private double DEFAULT_CHEECK_OFFSET_RANGE=5.0;
+    private double DEFAULT_CHEECK_OFFSET_RANGE=3.0;
     private int DEFAULT_FACE_POSITION_IN_BACKGROUND_X=250;
     private int DEFAULT_FACE_POSITION_IN_BACKGROUND_Y=350;
     private int DEFAULT_FACE_RADIUS_IN_BACKGROUND=125;
@@ -88,6 +91,8 @@ public class CheekFlagOverlay {
 
 
 
+
+
     public int[] getRequiredFlagSize(Bitmap flagImage){
 
         int flagHeight;
@@ -143,7 +148,7 @@ public class CheekFlagOverlay {
             }
         }
         Bitmap faceWithFlagsOnCheeks=overlay(originalImage, transparentBitmap);
-        Bitmap croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0],
+        Bitmap croppedBitmap = Bitmap.createBitmap(originalImage, croppingMetrics[0],
                 croppingMetrics[1] , croppingMetrics[2] , croppingMetrics[3] );
         Log.v("Cropped width,hieght",croppedBitmap.getWidth()+" "+croppedBitmap.getHeight());
         int croppingExtention= (int) ((double)(croppedBitmap.getWidth()*300)/(double)560);
@@ -153,7 +158,7 @@ public class CheekFlagOverlay {
             croppedBitmap = Bitmap.createBitmap(faceWithFlagsOnCheeks, croppingMetrics[0]-croppingExtention/2,
                     croppingMetrics[1]-croppingExtention/2, croppingMetrics[2] + croppingExtention, croppingMetrics[3] + croppingExtention);
         }else{
-            croppedBitmap=faceWithFlagsOnCheeks;
+            croppedBitmap=originalImage;
         }
         Bitmap resizedFaceWithFlag=croppedBitmap;
         if(croppedBitmap.getWidth()>croppedBitmap.getHeight()) {
@@ -203,7 +208,7 @@ public class CheekFlagOverlay {
         Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
         Paint paint = new Paint();
-        paint.setAlpha(170);
+        paint.setAlpha(150);
         canvas.drawBitmap(bmp1, new Matrix(), null);
         canvas.drawBitmap(bmp2, new Matrix(), paint);
         return bmOverlay;
